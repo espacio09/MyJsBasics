@@ -4,7 +4,7 @@
 - 💞️ I’m looking to collaborate on testing UIs
 - 📫 How to reach me via this environment.
 - 😄 Pronouns: All's well that ends well!
-- ⚡ Fun fact: Once a rabbit came into a backery and asked for 5 baked rolls. The baker said:"You should take 6 - so you will have one extra"! (German humor) - explanation: just take one more roll not only 5 ;-)
+- ⚡ Fun fact: Once a rabbit came into a bakery and asked for 5 baked rolls. The baker said:"You should take 6 - so you will have one extra"! (German humor) - explanation: just take one more roll not only 5 ;-)
 
 <!---
 espacio09/espacio09 is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
