@@ -1,0 +1,47 @@
+<!-- 
+To view your js code:
+You can:
+
+1. Right click on index file and then context menu should show
+
+    Show Preview 
+
+after section Open ........
+
+
+or better 
+/////////////////////////////////////////////
+
+2. Interactive Show Preview   !!!!!
+
+At the right hand side of opened files in VS Code
+hover over first shown button:
+
+Show Preview
+
+Opens interactive window - means you can
+change js code directly and see it - 
+also see active behaviour on the console - 
+if you split the browser in 2 windows.
+
+
+////////////////////////////////////////////
+
+
+or install    directly in codespace
+
+
+HTML Play
+v0.0.10
+bianxianyang
+1,382,398
+(7)
+html/js/css playground
+
+html/javascript/css playground
+
+usage
+HTMLPlay: play / ctrl-alt-h
+
+Select the index.html / script.js / style.css file in a directory to run index.html+script.js+style.css.
+Select other *.html or *.js files in a directory to run this single file.

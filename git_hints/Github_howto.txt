@@ -1,0 +1,261 @@
+Tutorial with Mosh
+https://www.youtube.com/watch?v=8JJ101D3knE
+
+https://mosh.link/git-course
+
+
+https://www.gitkraken.com/learn/git?utm_feeditemid=&utm_device=c&utm_term=git%20scm%20download&utm_campaign=GK+Git+GUI+-+Search+(EN)&utm_source=google&utm_medium=ppc&hsa_acc=1130375851&hsa_cam=21436108014&hsa_grp=162951585774&hsa_ad=704972894855&hsa_src=g&hsa_tgt=kwd-38802574047&hsa_kw=git%20scm%20download&hsa_mt=b&hsa_net=adwords&hsa_ver=3&gad_source=1&gclid=CjwKCAjwnK60BhA9EiwAmpHZwwPrW4Y0AJLwRp_E5UKFDYkRtxTgPNop-O7f6nIQ2wujuSTfbpCQJBoCgbwQAvD_BwE
+
+GUI tools
+check for GitLens and GitKraken
+or use commandline
+
+git --version
+use git bash as prompt
+
+Settings - .gitconfig   file
+git confi --global user.name "Tatjana Klatyik"
+git confi --global user.email TatjanaKlatyik@aol.com
+git config --global core.editor "code --wait"
+git config --global -e
+git config --global core.autocrlf input   (on linux)
+
+git config --help   (q to exit)
+or 
+git confit --h
+
+code    (to get vscode open)
+
+______________________________________________________
+initialize a repository
+
+create a directory
+mkdir Moon
+cd Moon
+git init  (makes moon a repository)
+
+ls -a   (to see .git)
+open .git   (shows all files that belong to git as repoadmin tool)
+Zsh - for nice terminal
+
+
+staging area = index  --- this is like a snapshot
+________________________________________________
+
+git add  (to pt files to staging area)
+
+git commit -m "here message for the change"
+
+git add <file1>   (again to have changes in staging area - ready for a new commit)
+
+-------------------------------------------------
+
+echo   --- is linux command to write text
+
+echo hello file1.txt
+echo hello file2.txt
+git status
+   ---- see the tracking status of files
+
+git add .    (entire directory added)
+   git status          -- green means staged
+
+git commit -m "short description of why the commit"
+or
+git commit    --- commit editmsg opens and you can enter description here.
+
+how often commit per day???? 
+- e.g. bug fix and correct typo do two different commits
+    ---- depending the importance - bug is important
+ - message should be in present tense
+
+or do another commit and message in one
+
+commit -am "  here type message"
+
+______________________________________
+remove file
+rm file2.txt      (remove linux command)
+
+stage file
+git add file2.txt
+and commit
+
+or git rm file2.txt    (both staging area and commit are done in one command)
+
+________________________________________________
+move files - rename files
+mv file1.txt file333.txt
+git status
+add .
+git status   (see staging status)
+
+or use git mv file1.txt file444.js
+_______________________________________
+ignore files
+
+mkdir logs
+echo hello > logs/dev.log
+.gitignore
+echo logs/ > .gitignore
+code .gitignore
+*.log   (all logfiles to be ignored)
+git status
+
+git add .gitignore
+git commit -m "Add gitignore"
+
+git ls-files
+git rm --cached -r bin/    (entire bin directory removed from staging /index area)
+git commit -m
+
+
+
+github/gitignore   has various templates to ignore files while committing e.g. class, log files etc.
+
+_____________________________________________________________
+Short status     - in staging area
+
+git status -s    (shows the new files and their status)
+M = modified files
+A = newly added files
+
+________________________________________________________________
+Lines of codes staged for the next commmit
+
+git diff --staged
+or 
+git diff
+
+_______________________________________________________________-
+Visual diff tools
+
+VSCode
+configure VSCode
+git config --gloal diff.tool vscode
+git config --global difftoll.vscode.cmd "code --wait --diff $LOCAL $REMOTE"
+    ---- set path for the command code in settings for vscode ------
+git config --global -e    (here you can change global settings for gitconfig)
+
+now use difftool
+git difftool    (without filename compares working area and staging area)
+or difftool --staged
+
+____________________________________________________________________
+View history for commits
+
+git log
+
+   --- head is a refernce to the current branch where you are working on
+
+git log --oneline
+git log --reverse      ----- reverses history
+__________________________________________________________
+
+Inspect a commit
+
+git show < id of commit>
+git show HEAD~1    --- staring from head one stage back 
+
+git ls-tree          ---- list all files in a tree
+git ls-tree HEAD~1
+
+     - blob is file 
+     - tree is directory
+
+e.g.
+git show <and identifier>        ---------- git objects , commits, blobs(files), trees (directories), tags
+
+
+_______________________________________________________
+Before a commit - always check staging area !!!!!!
+
+git status -s
+
+get files back from staging area to working area (local):
+
+git restore --staged  <filename>
+
+git restore .
+
+git clean     ------  untracked files to be removed  - here be careful
+
+git clean -fd      -----  remove all files and directories from staging area
+__________________________________________________________________
+
+resotre a file to an earlier version
+
+git rm <filename> 
+git commit -m "delete filename"
+git log --oneline
+
+git restore -h     ---- 3 argumnets can be taken
+git resotre --source=HEAD~1 filename
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

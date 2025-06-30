@@ -1,0 +1,65 @@
+Merge and Branches in Git
+
+https://www.youtube.com/watch?v=vw-2U0u7Ni4
+______________________________________________________________
+
+e.g.
+git add index.html
+
+git commit -m "update code for index file"
+
+git branch    ---------- check the current branch you are on
+
+git branch nav-bar      ---- create new brach with name nav-bar as example
+
+git branch        ----- check for all branches - see where the pointer is
+
+   ---------- change branch to new created branch -----------------
+
+git checkout nav-bar    
+git branch                ---- check where pointer  is
+
+touch nav-bar.html   --------create nav-bar file
+
+git status - we are on nav-bar branch
+
+git add nav-bar.html
+git commit -m "add file to nav-bar branch"
+
+git checkout master   --------- go to master branch
+
+touch hero-section.html     ----- create new file on master branch
+
+git add hero-section.html
+git commit -m "add hero section to master"
+
+now we have 2 branches with 2 different files and versions
+
+git log --oneline      --- 
+
+git checkout nav-bar       ----- or use git switch   ---changes the branch
+git log -oneline         ----- see where the different heads are
+
+git switch -c  branch name    (creates a brach and moves you there)
+git checkout -b                   "
+check always where the HEAD is
+
+_______________________________________________________________________
+
+Merging of the branches
+
+git branch         ----  where am I
+git checkout master    -------- now I am on master
+git branch
+
+git merge nav-bar       --------- no extra message needed
+
+git log --online         ----- see nav-bar added to code base
+
+git branch -d nav-bar    ------- delete nav-bar branch
+
+
+_____________________________________________________________
+
+Conflicts
+

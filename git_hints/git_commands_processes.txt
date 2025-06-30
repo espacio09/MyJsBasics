@@ -1,0 +1,92 @@
+Wir fangen an mit:
+
+Confit anpassen für den späteren Commit
+git config --global user.name "Tatjana Klatyik"
+git config --global user.email TatjanaKlatyik@aol.com
+git config --global init.default branch main
+
+Ask git for help when questions on commands
+git config -help
+this starts help menu for config
+
+or type for more detailed information: - it opens a manual 
+git help config 
+
+>clear
+to clear terminal
+
+////////////////////////////////////////////////////////////////
+Check where your files are
+
+>cd centos@ua577-gcp-91 ~/Tatjana-js-project $ 
+
+
+>git init   //// and press enter to initialize repository
+
+>git status   ////  will show the branch you are at - here branch master or main
+              ///  with all files untracked in red
+
+> git add --all    /// track all the files       or git add A     or git add .    for entire directory
+
+>git commit -m "here write a message for your commit"
+
+>git diff   ////  to see changes for modified files
+
+>git log   /// shows all different commits
+
+>git log --oneline     /// shows all git commits   short version
+
+
+/////////////   create a new branch
+
+>git branch Fixmyrepo       ///creates new branch Fixmyrepo
+>git branch          //////  shows the new branch
+
+>git switch Fixmyrepo      ///switches to branch which is required for 
+
+>git merge -m "merge missing folders to master" Fixmyrepo    //// modified files will be merged from Fixmyrepo to master
+
+>git branch -d Fixmyrepo    /// to delete branch which is no more needed
+
+>git branch     ///verify
+
+/////////   merge if master had changed   -----  this is a merge confilict
+////////////////////////////////////////////////////////////////////////////////////
+
+>git switch -c updateText    ////////   create new branch  this is the new branch
+      commit your changes
+>git switch master
+>git commit -a -m "updated a file in master" 
+         commit changes in main  ----  now there is the conflict
+
+>git merge updateText
+        no conflict message appears for file 
+
+/////////////////   push to origin master branch from local
+
+
+>git branch -m master
+>git push -u origin master
+
+>git push --all       ////   pushes all branches to github
+
+////////////// get code from master to local
+
+>git fetch
+>git merge
+
+these two commands are:
+>git pull
+
+
+
+
+
+
+
+
+
+
+
+
+
