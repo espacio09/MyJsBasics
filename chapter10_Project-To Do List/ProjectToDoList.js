@@ -26,8 +26,8 @@
 
 
 //// Adding todos to the list in the Form
- ToDoListForm.addEventListener('submit', e => 
-    e.preventDefault()
+ ToDoListForm.addEventListener('submit' e => 
+    e.preventDefault())
     const todo = ToDoListForm.ToDoList.value.trim(),
    // console.log(todo);
 
