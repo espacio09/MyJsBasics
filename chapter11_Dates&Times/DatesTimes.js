@@ -11,7 +11,8 @@ console.log(typeof now);
 
 
 // years, months, days, times  --- some methods
-console.log('getFullYear:', now)
+console.log('getFullYear:', now.getFullYear());
+console.log('getFullYear:', now.getFullYear());
 
 
 
