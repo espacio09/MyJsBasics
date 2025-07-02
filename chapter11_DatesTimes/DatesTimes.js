@@ -30,9 +30,9 @@ console.log(now.toLocaleString());
 //timestamps - initial date and a specific date
 
 const before = new Date('February 1 2019 7:30:59');
-const now = new Date();
+//const now = new Date();
 
-console.log(now.getTime() before.getTime());
+console.log(now.getTime(), before.getTime());
 
 // difference between two times
 
