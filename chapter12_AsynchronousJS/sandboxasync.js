@@ -197,7 +197,6 @@ getTodos('todos/luigi.json', (err, data) => {
 //////////////////////////////////////////
 ///    94. Promise Basics
 ///        - promises: concept to avoid nested callback functions
-
 /*          example:
 
 const getSomething = () => {
@@ -216,16 +215,20 @@ getSomething().then((data)   =>  {
 }
 */
 
+///        - promises: concept to avoid nested callback functions
+//           here the code how it works
+/*
 const getTodos = (resource) => {
 
     return new Promise((resolve, reject)  => {
     const request = new XMLHttpRequest();
 
-request.addEventListener('readystatechange', () => {
+request.addEventListener('readystatechange'),() => {
 if(request.readyState === 4 && request.status === 200){
     const data = JSON.parse(request.responseText);
     resolve(data);
-    }
+    };
+
 } else if(request.readyState === 4){
     reject('error getting resource');
 }
@@ -234,15 +237,14 @@ if(request.readyState === 4 && request.status === 200){
 request.open('GET',resource);
 request.send();
 
-});
-};
-
 // .then takes in a function - catch for the error
 
 getTodos('todos/luigi.json').then(data => {
     console.log('promise resolved:', data);
 }).catch(err => {
     console.log('promise rejected:' , err);
+};
 });
+*/
 
-  
+
