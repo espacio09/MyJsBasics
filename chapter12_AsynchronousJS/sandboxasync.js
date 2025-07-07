@@ -320,11 +320,19 @@ fetch('todos/luigi.json').then((response)  => {
 //  97 Async and await
 //        - chain promises together in a clean and readable way
 
+//   98  Throwing and catching  errors  - .catch
+
+
 // create an async function:
 
 const getTodos = async () => {
 
    const response = await  fetch('todos/luigi:json'); 
+
+  /// to catch error if status is not 200 - e.g. when an resource error occurs e.g. wrong file name
+    if(response.status !== 200){
+        throw new Error('cannot fetch the data');
+    }
    const data = await response.json();
    return data;
 
@@ -338,6 +346,7 @@ console.log(2);
 
 getTodos()
 .then(data => console.log('resolved:', data));
+.catch(err => console.log('rejected:', err.message));
 
 console.log(3);
 console.log(4);
