@@ -1,0 +1,5 @@
+[
+    { "text": "play piano", "author": "luigi", "points": true},
+    { "text": "buy apples", "author": "luigi", "points": false},
+    { "text": "do swiping", "author": "luigi", "points": true}
+]

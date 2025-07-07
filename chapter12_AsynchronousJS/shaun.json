@@ -1,0 +1,5 @@
+[
+    { "text": "play chez", "author": "shaun", "points": true},
+    { "text": "buy milk", "author": "shaun", "points": false},
+    { "text": "do nothing", "author": "shaun", "points": true}
+]

@@ -154,10 +154,12 @@ getTodos((err, data)    => {
 */
 
 //////////////////////////////////////////////////////////////////
-//   93. working with JSON data - use it (parsing it)
-//        as java script objects in order to further use them
+//   93. callback hell
+//        have several json files that we want to call 
+//        and read the data out -  of one after the other
+//        use resource to read the different files as input data
 
-const getTodos = (callback) => {
+const getTodos = (resource, callback) => {
 
 const request = new XMLHttpRequest();
 
@@ -174,15 +176,19 @@ if(request.readyState === 4 && request.status === 200) {
 //use json file in same directory as sandbox file
 //  as output see json data as js objects
 
-request.open('GET','todos.json');
+request.open('GET',resource);
 request.send();
 };
 
-getTodos((err, data)    => {
-    console.log('callback fired');
-    if(err){
-        console.log(err);
-    } else {
+
+// nested callback in callback in callback - is nesting hell
+
+getTodos('todos/luigi.json', (err, data) => {
+    console.log(data);
+       getTodos('todos/luigi.json', (err, data) => {
         console.log(data);
-    }
+        getTodos('todos/luigi.json', (err, data) => {
+            console.log(data);
+        });
+    });
 });
