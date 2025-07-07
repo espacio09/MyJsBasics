@@ -247,7 +247,7 @@ getTodos('todos/luigi.json').then(data => {
 });
 */
 
-
+/*
 /////////////////////////////////////////////
 //    95. Chaining Promises
 ///       use promises to manage network requests
@@ -288,6 +288,30 @@ getTodos('todos/luigi.json').then(data => {
     console.log('promise 3 resolved:', data);
 }).catch(err => {
     console.log('promise rejected:' , err);
+});
+
+*/
+
+
+//////////////////////////////////////////////////
+//////   96. fetch API   - includes promises and requests
+    //                     fetch api is an easier way to get data
+    //                     is built right into the language
+///  returns a promise
+//   resolve object and in catch reject object
+//  rejection only if api is not reachable - having e.g. a typo in json file name
+//  no rejection fired - get 404 error
+
+
+fetch('todos/luigi.json').then((response)  => {
+    console.log('resolved', response);
+    // to get json data is parsed and displayed you have to request the json response
+    //  response is another promise - return required
+    return response.json();
+}).then(data => {
+    console.log(data);
+}).catch((err) => {
+    console.log('rejected', err);
 });
 
 
