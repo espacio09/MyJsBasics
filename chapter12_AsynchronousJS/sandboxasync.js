@@ -292,7 +292,7 @@ getTodos('todos/luigi.json').then(data => {
 
 */
 
-
+/*
 //////////////////////////////////////////////////
 //////   96. fetch API   - includes promises and requests
     //                     fetch api is an easier way to get data
@@ -314,6 +314,32 @@ fetch('todos/luigi.json').then((response)  => {
     console.log('rejected', err);
 });
 
+*/
 
+//////////////////////////////////////////
+//  97 Async and await
+//        - chain promises together in a clean and readable way
+
+// create an async function:
+
+const getTodos = async () => {
+
+   const response = await  fetch('todos/luigi:json'); 
+   const data = await response.json();
+   return data;
+
+};
+
+///// test that code gets executed - async function will be fired at the end - 
+////  not to block the other code inbetween
+
+console.log(1);
+console.log(2);
+
+getTodos()
+.then(data => console.log('resolved:', data));
+
+console.log(3);
+console.log(4);
 
 
