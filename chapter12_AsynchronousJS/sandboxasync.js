@@ -158,7 +158,7 @@ getTodos((err, data)    => {
 //        have several json files that we want to call 
 //        and read the data out -  of one after the other
 //        use resource to read the different files as input data
-
+/*
 const getTodos = (resource, callback) => {
 
 const request = new XMLHttpRequest();
@@ -192,3 +192,57 @@ getTodos('todos/luigi.json', (err, data) => {
         });
     });
 });
+
+*/
+//////////////////////////////////////////
+///    94. Promise Basics
+///        - promises: concept to avoid nested callback functions
+
+/*          example:
+
+const getSomething = () => {
+
+    return new Promise((resolve, reject)  => {
+       // fetch some data - resolve or reject - error or success
+
+        resolve('some data');
+
+       // reject('some error');
+        });
+
+getSomething().then((data)   =>  {
+    console.log(data);
+});
+}
+*/
+
+const getTodos = (resource) => {
+
+    return new Promise((resolve, reject)  => {
+    const request = new XMLHttpRequest();
+
+request.addEventListener('readystatechange', () => {
+if(request.readyState === 4 && request.status === 200){
+    const data = JSON.parse(request.responseText);
+    resolve(data);
+    }
+} else if(request.readyState === 4){
+    reject('error getting resource');
+}
+});
+
+request.open('GET',resource);
+request.send();
+
+});
+};
+
+// .then takes in a function - catch for the error
+
+getTodos('todos/luigi.json').then(data => {
+    console.log('promise resolved:', data);
+}).catch(err => {
+    console.log('promise rejected:' , err);
+});
+
+  
