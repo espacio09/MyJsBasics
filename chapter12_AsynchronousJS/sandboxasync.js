@@ -1,3 +1,5 @@
+/*
+
 console.log(1);
 console.log(2);
 
@@ -46,7 +48,7 @@ request.send();
 // check readyState and status   - status 200 - data will come back
 //   status 404 means - endpoint not correct - URL cannot be found
 //   see mozilla MDN guide for status codes
-
+/*
 const request = new XMLHttpRequest();
 
 request.addEventListener('readystatechange',() => {
@@ -65,7 +67,8 @@ request.open('GET','https://jsonplaceholder.typicode.com/todosxx/');
 request.send();
 
 
-////////////////////////////////////////////////////////
+/*
+///////////////////////////////////////////////////////
 //  91. callback functions
 // callback function if task is complete - all responses got received
 // wrap up code into a function - make a request to make it more usable
@@ -112,3 +115,74 @@ console.log(3);
 console.log(4);
 
 
+*/
+
+/* //////////////////////////////////////////////////////////////////
+//   92. working with JSON data - use it (parsing it)
+//        as java script objects in order to further use them
+
+const getTodos = (callback) => {
+
+const request = new XMLHttpRequest();
+
+
+// we want to do sth. with the data at state 4 - have the response data
+if(request.readyState === 4 && request.status === 200) {
+    // in data array of JSON data(string) will be parsed in as js data objects
+    const data = JSON.parse(request.responseText);
+    callback(undefined,data);
+} else if (request.readyState === 4) {
+    callback('could not fetch data', undefined);
+}
+
+//use json file in same directory as sandbox file
+//  as output see json data as js objects
+
+request.open('GET','todos.json');
+request.send();
+};
+
+getTodos((err, data)    => {
+    console.log('callback fired');
+    if(err){
+        console.log(err);
+    } else {
+        console.log(data);
+    }
+});
+
+*/
+
+//////////////////////////////////////////////////////////////////
+//   93. working with JSON data - use it (parsing it)
+//        as java script objects in order to further use them
+
+const getTodos = (callback) => {
+
+const request = new XMLHttpRequest();
+
+
+// we want to do sth. with the data at state 4 - have the response data
+if(request.readyState === 4 && request.status === 200) {
+    // in data array of JSON data(string) will be parsed in as js data objects
+    const data = JSON.parse(request.responseText);
+    callback(undefined,data);
+} else if (request.readyState === 4) {
+    callback('could not fetch data', undefined);
+}
+
+//use json file in same directory as sandbox file
+//  as output see json data as js objects
+
+request.open('GET','todos.json');
+request.send();
+};
+
+getTodos((err, data)    => {
+    console.log('callback fired');
+    if(err){
+        console.log(err);
+    } else {
+        console.log(data);
+    }
+});

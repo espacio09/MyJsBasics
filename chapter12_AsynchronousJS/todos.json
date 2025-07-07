@@ -1,0 +1,7 @@
+// json string is an array of objects
+//  keys - strings used as values have to go into  double quotes /not numbers nor boolean
+[
+    { "text": "play markokart", "author": "shaun", "points": true},
+    { "text": "buy some brean", "author": "mario", "points": false},
+    { "text": "do the plumming", "author": "luigi", "points": true}
+]
