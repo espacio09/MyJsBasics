@@ -3,13 +3,25 @@
 
 // in accuweather have the api key for city search (get city search) - with this get then the
 //  temperature
-
-
 const key = 'place api key here from accuweather - which is a random string '
+
+
+// get weather information location via id
+// in accuweather get Current Conditions - Resource URL
+const getWeather = async (id) => {
+
+        const base = 'http://dataservice.accuweather.com/currentconditions/v1/';
+        const query = `${id}?apikey=${key}`;
+
+        const response = await fetch(base + query);
+        const data = await response.json();
+
+        return data[0];
+
+};
 
 // get the city from api key on accuweather - to make the request to the api end point with URL
 // below
-
 const getCity = async () => {
 
         const base = 'http://dataservice.accuweather.com/locations/v1/cities/search';
@@ -28,9 +40,14 @@ const getCity = async () => {
        return data[0];
 };
 
+
 // call the method getCity
 
-getCity('manchester')
-    .then(data => console.log(data))
-    .catch(err => console.log(err));
+/* test out that id of temp and get city work - as promise function
+getCity('manchester').then(data => {
+    return getWeather(data.Key);
+    }).then(data => {
+    console.log(data);
+    }).catch(err => console.log(err));
+*/
 
