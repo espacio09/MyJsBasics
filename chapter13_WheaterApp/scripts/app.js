@@ -1,15 +1,27 @@
 // app.js is for DOM manipulation
 // get the form, card and details from index.html
+// to manipulate time and icon get classes img and icon img from index.html
 
 const cityForm = document.querySelector('form');
 const card = document.querySelector('.card');
 const details = document.querySelector('.details');
+const time = document.querySelector('img.time');
+const icon = document.querySelector('.icon img');
+
 
 // with these 3 references create function for updating the ui
 const updateUI = (data) => {
 
-    const cityDets = data.cityDets;
-    const weather = data.weather;
+    // console.log(data);
+    // const cityDets = data.cityDets;
+    // const weather = data.weather;
+
+    // destructure properties - above properties defined as const cityDets and weather
+    // to destructure this (looks neater) - have it like:  (its doing the same as above)
+
+    const { cityDets, weather } = data;
+
+
 
   //update details template - DOM: index.html - parent is details to be set in a
   // template string ``  ---- the values come from data returned as json array
@@ -22,15 +34,26 @@ const updateUI = (data) => {
          </div>
         `;
 
+    // update the night/day & icon images - image and icon folder
+    // Src will be the source which we will use
+
+    let timeSrc = null;
+    if(weather.IsDayTime){
+        timeSrc = 'img/day.svg';
+    } else {
+        timeSrc = 'img/night.svg';
+    }
+    time.setAttribute('src', timeSrc);
+
+
+
         // remove the d-none class (in index.html necessary) if present
         // if check if class is there
 
         if(card.classList.contains('d-none')){
             card.classList.remove('d-none');
         }
-
 };
-
 
 //update city when entering new city - with async function with weather id and city info
 //this async function returns a promise
