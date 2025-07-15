@@ -1,11 +1,39 @@
 // app.js is for DOM manipulation
-// get the form from index.html
+// get the form, card and details from index.html
 
 const cityForm = document.querySelector('form');
+const card = document.querySelector('.card');
+const details = document.querySelector('.details');
+
+// with these 3 references create function for updating the ui
+const updateUI = (data) => {
+
+    const cityDets = data.cityDets;
+    const weather = data.weather;
+
+  //update details template - DOM: index.html - parent is details to be set in a
+  // template string ``  ---- the values come from data returned as json array
+    details.innerHTML = `
+      <h5 class="my-3">${cityDets.EnglishName}</h5>
+            <div class="my-3">${weather.WeatherText}</div>
+            <div class="display-4 my-4">
+               <span>${weather.Temperature.Metric.Value}</span>
+               <span>&deg;C</span>
+         </div>
+        `;
+
+        // remove the d-none class (in index.html necessary) if present
+        // if check if class is there
+
+        if(card.classList.contains('d-none')){
+            card.classList.remove('d-none');
+        }
+
+};
+
 
 //update city when entering new city - with async function with weather id and city info
 //this async function returns a promise
-
 const updateCity = async (city) => {
     
     //console.log(city);    //for testing purpose that submit of city works
@@ -13,11 +41,15 @@ const updateCity = async (city) => {
     const cityDets = await getCity(city);
     const weather = await getWeather(cityDets.Key);
 
-    // return the properties: and data in an object
+    // return the properties: and data(property value) in an object
     return {
 
         cityDets: cityDets,
         weather: weather,
+        // this in object shorthand notation:
+        // would be because name of property and value are the same, just write:
+        // return { cityDets, weather };
+        // 
     }
 }
 
@@ -30,9 +62,9 @@ cityForm.addEventListener('submit', e =>{
     const city = cityForm.city.value.trin();
     cityForm.reset();   // clearout the form fields with reset
 
-    // update the ui with new city - is also an async function
-
+    // update the ui with new city - is also an async function - see function
+    // updateUI above
     updateCity(city)
-        .then(data => console.log(data))
+        .then(data => updateUI.log(data))
         .catch(err => console.log(err));
 } )
