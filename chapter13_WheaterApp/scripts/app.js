@@ -40,12 +40,18 @@ const updateUI = (data) => {
     const iconSrc = `img/icons/${weather.WeatherIcon}.svg`;
     icon.setAttribute('src', iconSrc);
 
-    let timeSrc = null;
-    if(weather.IsDayTime){
+
+    // the ternary operator(bedingter Operator) to shorthand if ...  else clause
+    // see below
+    let timeSrc = weather.IsDayTime ? 'img/day.svg' : 'img/night.svg';
+
+    //let timeSrc = null;
+    /*if(weather.IsDayTime){
         timeSrc = 'img/day.svg';
     } else {
         timeSrc = 'img/night.svg';
     }
+        */
     time.setAttribute('src', timeSrc);
 
 
