@@ -1,7 +1,39 @@
-//  chapter 13 the weather app
+//  chapter 14 - Local Storage
+////////////////////////////////////////
 
-console.log(1);
-console.log(2);
+// local storage is under the window object on vs code console - type window.localStorage
+// to get that !!!! - see length
+// we can also only type localStorage
+
+
+//  store data in local storage - e.g. for a user wants to come back to his
+//  currently used data on website in the browser
+//  all char in local storage get converted into a string
+
+ localStorage.setItem('namen', 'mario');
+ localStorage.setItem('age', '50');
+
+// retrieve data from local storage to use it in the application
+let name = localStorage.getItem('namen');
+let age = localStorage.getItem('age'); 
+
+console.log(namen, age);
+
+// updating data - in local storage is looked up if data exisits - if so
+//  it gets updated, if not it is set newly
+
+ localStorage.setItem('namen', 'luigi');
+ localStorage.setItem('age', '99');
+
+ namen = localStorage.getItem('namen');
+ age = localStorage.getItem('age');
+ console.log(namen, age);
+
+
+
+
+
+
 
 //  simulation for network request (async code) to be processed - which fires later - does not block the code logs 1 to 4 here
 
