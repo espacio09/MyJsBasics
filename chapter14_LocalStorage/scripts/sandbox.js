@@ -30,6 +30,59 @@ console.log(namen, age);
  console.log(namen, age);
 
 
+ // deleting data from local storage
+
+localStorage.removeItem('namen');
+
+namen = localStorage.getItem('namen');
+console.log(namen);    // will display null
+
+// to clear all items from localStorage
+localStorage.clear();
+
+
+////////////////////////////////////////
+//  js array of objects - to store it in localStorage
+//  1st turn it into a json string - method stringify
+
+
+const todos = [
+
+    {text: 'play mariokart', author: 'shaun'},
+    {text: 'buy somemilk', author: 'mario'},
+    {text: 'buy somebread', author: 'luigi'}
+];
+
+//   console.log(JSON.stringify(todos));
+
+localStorage.setItem('todos', JSON.stringify(todos));
+
+// retrieve the JSON data
+
+const stored = localStorage.getItem('todos');
+console.log(stored);
+
+//JSON parse to turn it into an array
+
+console.log(JSON.parse(stored));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
