@@ -1,9 +1,44 @@
-//  chapter 14 - Local Storage
+//  chapter 15 - Object Oriented Java Script
 ////////////////////////////////////////
 
-// local storage is under the window object on vs code console - type window.localStorage
-// to get that !!!! - see length
-// we can also only type localStorage
+// create new user object - as an array
+/*
+const userOne = {
+    username: :'ryu',
+    email: 'ryu@thenetninja.co.uk',
+    login(){
+        console.log('the user logged in');
+        },
+    logout(){
+        console.log('the user logged out'); 
+    }
+};
+console.log(userOne.email, userOne.username);
+userOne.login();
+
+// second user
+const userTwo = {
+    username: :'chun li',
+    email: 'chun.li@thenetninja.co.uk',
+    login(){
+        console.log('the user logged in');
+        },
+    logout(){
+        console.log('the user logged out'); 
+    }
+};
+console.log(userTwo.email, userTwo.username);
+userTwo.login();
+*/
+
+//////    this all would result in a mess creating x-users so there is a better
+//////    way to do this
+
+const userThree = new User();
+
+
+
+
 
 
 //  store data in local storage - e.g. for a user wants to come back to his
