@@ -69,10 +69,29 @@ class User{
 // admins get extra methods e.g.
 
 class Admin extends User{
+
+    // additional constructor for only Admin properties - here 3rd argument in
+    //  userThree - black-belt-ninja - see below
+
+    // with own constructor no inheritance from Class User anymore - but calling super to
+    // call properties from class user - super looks for 
+    // the parent constructor for username and email 
+    // - super has to be called before we add new properties with .this
+
+        constructor(username, email, title){
+            super(username, email);
+        //  attach the title - new property for class Admin
+        this.title = title;
+
+        }
 deleteUser(User){
-        users = users.filter(u => u.username !== userOne.username);
+        User = User.filter(u => u.username !== userOne.username);
      }
 }
+///////  what if Admin class gets addressed its extra properties - 
+//       e.g. a custom title property 
+//       Admin class needs to have its own constructor and inherit constructor from
+//       class User
 
 // the 'new' keyword
 // 1 - it creates a new emtpy object {}
@@ -82,11 +101,19 @@ deleteUser(User){
 
 const userOne = new User('mario', 'mario@thenetninja.co.uk');
 const userTwo = new User('luigi', 'luigi@thenetninja.co.uk');
-const userThree = new Admin('shaun', 'shaun@thenetninja.co.uk');
+const userThree = new Admin('shaun', 'shaun@thenetninja.co.uk','black-belt-ninja');
+
+
+console.log(userThree);
+
+
+
 
 // method chaining
-console.log(userOne, userTwo, userThree);
+//console.log(userOne, userTwo, userThree);
 
+
+/*//////////////////////////////////////////////////////
 ////    as admin I want to delete one of these users
 let users = [userOne, userTwo, userThree];
 console.log(users);
