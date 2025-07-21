@@ -69,29 +69,37 @@ class User{
 // admins get extra methods e.g.
 
 class Admin extends User{
-
+deleteUser(User){
+        users = users.filter(u => u.username !== userOne.username);
+     }
 }
 
 // the 'new' keyword
 // 1 - it creates a new emtpy object {}
 // 2 - it binds the value of 'this' to the new empty object
 // 3 - it calls the constructor function to 'build' the object
+
+
 const userOne = new User('mario', 'mario@thenetninja.co.uk');
 const userTwo = new User('luigi', 'luigi@thenetninja.co.uk');
 const userThree = new Admin('shaun', 'shaun@thenetninja.co.uk');
 
-console.log(userOne, userTwo, userThree);
 // method chaining
-userOne.login().incScore().incScore().logout();
+console.log(userOne, userTwo, userThree);
+
+////    as admin I want to delete one of these users
+let users = [userOne, userTwo, userThree];
+console.log(users);
+
+userThree.deleteUser(userTwo);
+console.log(users);
+
+//userOne.login().incScore().incScore().logout();
 
 
 
 
-
-
-
-
-
+/*   LOCAL STORAGE   //////////////////////
 //  store data in local storage - e.g. for a user wants to come back to his
 //  currently used data on website in the browser
 //  all char in local storage get converted into a string
@@ -131,7 +139,6 @@ localStorage.clear();
 //  js array of objects - to store it in localStorage
 //  1st turn it into a json string - method stringify
 
-
 const todos = [
 
     {text: 'play mariokart', author: 'shaun'},
@@ -143,6 +150,7 @@ const todos = [
 
 localStorage.setItem('todos', JSON.stringify(todos));
 
+/////////////////////////////////////////////////////////
 // retrieve the JSON data
 
 const stored = localStorage.getItem('todos');
@@ -152,3 +160,4 @@ console.log(stored);
 
 console.log(JSON.parse(stored));
 
+*/
