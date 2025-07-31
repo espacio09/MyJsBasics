@@ -38,6 +38,8 @@ userTwo.login();
 //       built a class with inside a constructor function
 //       give properties to the instance in the constructor
 
+/*
+
 class User{
     constructor(username, email){
         // set up properties on the object
@@ -107,13 +109,11 @@ const userThree = new Admin('shaun', 'shaun@thenetninja.co.uk','black-belt-ninja
 console.log(userThree);
 
 
-
-
 // method chaining
 //console.log(userOne, userTwo, userThree);
 
 
-/*//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
 ////    as admin I want to delete one of these users
 let users = [userOne, userTwo, userThree];
 console.log(users);
@@ -122,7 +122,7 @@ userThree.deleteUser(userTwo);
 console.log(users);
 
 //userOne.login().incScore().incScore().logout();
-
+//////////////////////////////////////////////////////
 
 
 
@@ -188,3 +188,29 @@ console.log(stored);
 console.log(JSON.parse(stored));
 
 */
+
+
+///////////////////////////////////////////////////////////
+///// Chapter 122   - Constructors under the hood
+
+
+function User(username, email) {
+    // set up properties on the object
+    this.username = username;
+    this.email = email;
+    this.score = 0;
+}
+
+
+
+// the 'new' keyword
+// 1 - it creates a new emtpy object {}
+// 2 - it binds the value of 'this' to the new empty object
+// 3 - it calls the constructor function to 'build' the object
+
+
+const userOne = new User('mario', 'mario@thenetninja.co.uk');
+const userTwo = new User('luigi', 'luigi@thenetninja.co.uk');
+
+
+
