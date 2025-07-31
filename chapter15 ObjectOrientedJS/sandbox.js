@@ -39,7 +39,7 @@ userTwo.login();
 //       give properties to the instance in the constructor
 
 class User{
-    constructor(){
+    constructor(username, email){
         // set up properties on the object
         this.username = username;
         this.email = email;
