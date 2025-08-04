@@ -199,8 +199,23 @@ function User(username, email) {
     this.username = username;
     this.email = email;
     this.score = 0;
+    // methods are added to the prototype - login is the method within the constructor
+    //  this is the same as 'this' in the constructor function          
+    this.login = function() {
+        console.log(`${this.username} just logged in`);
+        return this;
+    };
+
 }
 
+//  new user objects created with the constructor function
+//  class User {
+//      constructor(username, email){
+//          // set up properties on the object
+//          //  this is the same as 'this' in the constructor function      
+//          this.username = username;
+//          this.email = email;}
+//          this.score = 0;
 
 
 // the 'new' keyword
@@ -211,6 +226,13 @@ function User(username, email) {
 
 const userOne = new User('mario', 'mario@thenetninja.co.uk');
 const userTwo = new User('luigi', 'luigi@thenetninja.co.uk');
+
+console.log(userOne, userTwo);
+userOne.login();
+userTwo.login();
+
+
+
 
 
 
