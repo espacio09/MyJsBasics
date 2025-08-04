@@ -243,18 +243,35 @@ User.prototype.logout = function() {
     console.log(`${this.username} just logged out`);
     return this;
 }
-User.prototype.incScore = function() {
-    this.score += 1;
-    console.log(`${this.username} has a score of ${this.score}`);
-    // return this to allow method chaining
-    // e.g. userOne.login().incScore().logout();    
-    return this;
-}
+
+// add an admin user with inheritance in prototype 
+
+function Admin (username, email, title) {
+        // call the parent constructor
+        User.call(this, username, email);
+        // attach the title - new property for class Admin
+        this.title = title;
+    }
+// inherit the prototype methods from User
+Admin.prototype = Object.create(User.prototype);
+// set the constructor to Admin     
+Admin.prototype.constructor = Admin;
+// add a method to the Admin prototype
+Admin.prototype.deleteUser = function(users, username) {
+    return users.filter(user => user.username !== username);
+};      
+// create new user objects with the constructor function
+//  this is the same as 'new User' in the class example above  
+
+
 
 const userOne = new User('mario', 'mario@thenetninja.co.uk');
 const userTwo = new User('luigi', 'luigi@thenetninja.co.uk');
+const userThree = new Admin('shaun', 'shaun@thenetninja.co.uk', 'black-belt-ninja');
 
-console.log(userOne, userTwo);
+
+
+console.log(userOne, userTwo, userThree);
 // method chaining
 userOne.login().logout();
 userTwo.login();
