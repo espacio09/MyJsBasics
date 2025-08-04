@@ -201,11 +201,13 @@ function User(username, email) {
     this.score = 0;
     // methods are added to the prototype - login is the method within the constructor
     //  this is the same as 'this' in the constructor function          
-    this.login = function() {
+   /* we do not need the login function anymore - cause we add the method to the prototype directly
+        see below prototypes
+        this.login = function() {
         console.log(`${this.username} just logged in`);
         return this;
     };
-
+*/
 }
 
 //  new user objects created with the constructor function
@@ -224,15 +226,38 @@ function User(username, email) {
 // 3 - it calls the constructor function to 'build' the object
 
 
+
+
+/////////////////////////////////////////////////////////////////////////////////////
+//  123 Prototype Model
+//  methods are added to the prototype - login is the method within the constructor 
+// attach our own user method to the prototype   __proto__
+
+User.prototype.login = function() {
+    console.log(`${this.username} just logged in`);
+    // return this to allow method chaining
+    // e.g. userOne.login().logout();
+    return this;
+    }
+User.prototype.logout = function() {
+    console.log(`${this.username} just logged out`);
+    return this;
+}
+User.prototype.incScore = function() {
+    this.score += 1;
+    console.log(`${this.username} has a score of ${this.score}`);
+    // return this to allow method chaining
+    // e.g. userOne.login().incScore().logout();    
+    return this;
+}
+
 const userOne = new User('mario', 'mario@thenetninja.co.uk');
 const userTwo = new User('luigi', 'luigi@thenetninja.co.uk');
 
 console.log(userOne, userTwo);
-userOne.login();
+// method chaining
+userOne.login().logout();
 userTwo.login();
-
-
-
 
 
 
