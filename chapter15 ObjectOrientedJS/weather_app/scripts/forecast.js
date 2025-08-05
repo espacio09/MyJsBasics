@@ -3,51 +3,46 @@
 
 // in accuweather have the api key for city search (get city search) - with this get then the
 //  temperature
-const key = 'place api key here from accuweather - which is a random string '
+//  and weather information for the city
+//  the api key is used to get the weather information for a specific city
 
 
-// get weather information location via id
-// in accuweather get Current Conditions - Resource URL
-const getWeather = async (id) => {
 
-        const base = 'http://dataservice.accuweather.com/currentconditions/v1/';
-        const query = `${id}?apikey=${key}`;
+class Forecast{
+// constructor to set the city
+//  the constructor is called when a new instance of the class is created       
+    constructor(){
+        this.key = '7PrviPgDK4L1AGEO5zX6mqswBpjAry';
+        this.weatherURI = 'http://dataservice.accuweather.com/currentconditions/v1/';
+        this.cityURI = 'http://dataservice.accuweather.com/locations/v1/cities/search';
+        }
 
-        const response = await fetch(base + query);
+        // set the city to get the weather information for
+       async updateCity(city) {
+        const cityDets = await this.getCity(city);
+        const weather = await this.getWeather(cityDets.Key);
+        // return an object with the city and weather information
+        return {cityDets, weather};
+
+       }
+       async getCity(city) {
+        // get the city data from the API
+        const query = `?apikey=${this.key}&q=${city}`;
+        const response = await fetch(this.cityURI + query);
         const data = await response.json();
+        return data[0]; // return the first match
+        //  this is the city data with the id to get the weather information
 
-        return data[0];
-
-};
-
-// get the city from api key on accuweather - to make the request to the api end point with URL
-// below
-const getCity = async () => {
-
-        const base = 'http://dataservice.accuweather.com/locations/v1/cities/search';
-// add query parameters to the end of an URL in an template string
-        const query =`?apikey=${key}&q=${city}`;
-
-//fetch the resource base and query concatonated by
-        const response = await fetch(base + query);
-
-// get Json method on the response: - resolved data is in data constant
+       }  
+       async getWeather(id) {
+        // get the weather data from the API
+        const query = `${id}?apikey=${this.key}`;
+        const response = await fetch(this.weatherURI + query);
         const data = await response.json();
-    
-        // closest match in the example for manchester is 0 in the array
-       //  console.log(data[0]);
+        return data[0]; // return the first match
+        //  this is the weather data for the city with the id
+       }                        
 
-       return data[0];
-};
+ }
 
-
-// call the method getCity
-
-/* test out that id of temp and get city work - as promise function
-getCity('manchester').then(data => {
-    return getWeather(data.Key);
-    }).then(data => {
-    console.log(data);
-    }).catch(err => console.log(err));
-*/
 

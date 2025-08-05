@@ -7,8 +7,19 @@ const card = document.querySelector('.card');
 const details = document.querySelector('.details');
 const time = document.querySelector('img.time');
 const icon = document.querySelector('.icon img');
+const forecast = new Forecast(); // create a new instance of the Forecast class
+// this is the class from forecast.js - which has the methods to get the city and weather
+//  information from the API
+//  the class is used to get the weather information for a specific city
+//  the class has methods to get the city and weather information from the API
+
+console.log(forecast);
 
 
+
+
+
+/*
 // with these 3 references create function for updating the ui
 const updateUI = (data) => {
 
@@ -21,10 +32,11 @@ const updateUI = (data) => {
 
     const { cityDets, weather } = data;
 
-
+*/
 
   //update details template - DOM: index.html - parent is details to be set in a
   // template string ``  ---- the values come from data returned as json array
+
     details.innerHTML = `
       <h5 class="my-3">${cityDets.EnglishName}</h5>
             <div class="my-3">${weather.WeatherText}</div>
@@ -46,12 +58,12 @@ const updateUI = (data) => {
     let timeSrc = weather.IsDayTime ? 'img/day.svg' : 'img/night.svg';
 
     //let timeSrc = null;
-    /*if(weather.IsDayTime){
+    if(weather.IsDayTime){
         timeSrc = 'img/day.svg';
     } else {
         timeSrc = 'img/night.svg';
     }
-        */
+        
     time.setAttribute('src', timeSrc);
 
 
@@ -63,26 +75,10 @@ const updateUI = (data) => {
         }
 };
 
-//update city when entering new city - with async function with weather id and city info
-//this async function returns a promise
-const updateCity = async (city) => {
-    
-    //console.log(city);    //for testing purpose that submit of city works
-    
-    const cityDets = await getCity(city);
-    const weather = await getWeather(cityDets.Key);
 
-    // return the properties: and data(property value) in an object
-    return {
 
-        cityDets: cityDets,
-        weather: weather,
-        // this in object shorthand notation:
-        // would be because name of property and value are the same, just write:
-        // return { cityDets, weather };
-        // 
-    }
-}
+// update the ui with new city - is also an async function - see function
+// updateUI above
 
 cityForm.addEventListener('submit', e =>{
     // prevent default action
@@ -93,9 +89,10 @@ cityForm.addEventListener('submit', e =>{
     const city = cityForm.city.value.trin();
     cityForm.reset();   // clearout the form fields with reset
 
+
     // update the ui with new city - is also an async function - see function
     // updateUI above
-    updateCity(city)
+    forecast.updateCity(city)
         .then(data => updateUI.log(data))
         .catch(err => console.log(err));
 
@@ -103,11 +100,10 @@ cityForm.addEventListener('submit', e =>{
         // update city from local Storage - set local storage
         localStorage.setIntem('city', city);
 
-} );
+
      // take local storage when user e.g. enters the webpage
 
         if(localStorage.getItem('city')){
-            updateCity(localStorage.getItem('city'))
+            forecast.updateCity(localStorage.getItem('city'))
             .then(data => updateUI(data))
             .catch(err => console.log.apply(err));
-        }
