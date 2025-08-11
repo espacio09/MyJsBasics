@@ -1,19 +1,18 @@
-const list = document.querySelector('ul');
+const list = document.getElementsByTagName('ul')[0];
 
-const addRecipe = (recipe) => {
+function addRecipe(recipe) {
   let html = `
   <li>
-  
-    <div class="d-flex justify-content-between align-items-center">
-      <span>${recipe.title}</span> 
-      </div>
+    <div>${recipe.title}</div>
     </li>
   `;
+
   list.innerHTML += html;
 }
 
 
- //   Add the recipe to the database
+
+/* //   Add the recipe to the database
   
 addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -24,4 +23,4 @@ addEventListener('submit', async (e) => {
   } catch (error) {
     console.error('Error adding recipe: ', error);
   }
-  });   
+    */
