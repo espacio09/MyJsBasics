@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=chrome">
-    <link rel="icon" href="path/to/your/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css">
     <title>Database Firebase</title>
@@ -35,6 +35,7 @@
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
   import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
   import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+  import { addDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
   // TODO: Add SDKs for Firebase products that you want to use
   // https://firebase.google.com/docs/web/setup#available-libraries
@@ -59,7 +60,7 @@
   
 // Fetching data from Firestore
   // This example fetches all documents from the 'recipes' collection   
-  
+
 const recipesCol = collection(db, 'recipes');
 getDocs(recipesCol).then((snapshot) => {
   snapshot.forEach(doc => {
