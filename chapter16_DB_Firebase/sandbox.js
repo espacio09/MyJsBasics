@@ -3,7 +3,7 @@
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
   import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
   import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-  import { addDoc, Timestamp, onSnapshot, query, orderBy  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+  import { addDoc, getDoc, serverTimestamp, onSnapshot, query, orderBy  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
   // TODO: Add SDKs for Firebase products that you want to use
@@ -28,65 +28,93 @@
   const db = getFirestore(app);
   const analytics = getAnalytics(app);  
 
-  
 
 
-// Display recipes function
-const displayRecipes = () => {
+  // DOMContentLoaded event listener: This ensures the DOM is fully loaded before interacting with it
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('form');
+    const outputList = document.getElementById('output');
 
-const q = query(collection(db, 'recipes'), orderBy("created_at", "desc"));
-onSnapshot(q, (querySnapshot) => {
-outputList.innerHTML = "";
-querySnapshot.forEach((doc) => {
+    // Display recipes function (moved outside onSnapshot)
+    const displayRecipes = () => {
+        const q = query(collection(db, 'recipes'), orderBy("created_at", "desc"));
+        onSnapshot(q, (querySnapshot) => {
+            try { // Add a try-catch block
+              outputList.innerHTML = ""; // Clear existing list items
+              querySnapshot.forEach((doc) => {
+                const recipe = doc.data();
+                const time = recipe.created_at ? recipe.created_at.toDate().toLocaleString() : 'Date not available';
 
 
- const recipe = doc.data();
-      const time = recipe.created_at.toDate().toLocaleString();
+                // Create list item (using correct timestamp field recipe.created_at)
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${recipe.title}</strong><br><small>${time}</small>`; // Use time variable here
+                outputList.appendChild(li);
+              }); 
+              
+            } catch (error) {
+              console.error("Error fetching recipes:", error);
 
-      const li = document.createElement('li');
-      li.innerHTML = `<strong>${recipe.title}</strong><br><small>${time}</small>`;
-      outputList.appendChild(li);
-});
-});
-    // Call displayRecipes after the DOM is loaded
+              // Optionally display an error message on the page
+              outputList.innerHTML = "<li>Error loading recipes</li>";
+            }
+        });
+    };
+
+    // Call displayRecipes initially to populate the list - outside of onSnapshot essentially
     displayRecipes();
 
 
-// Select form and output list (move this inside the DOMContentLoaded event listener)
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('form');
-    const outputList = document.getElementById('output');
-});
+    // Add recipe function
+   const addRecipe = async (recipeTitle) => {
+    if (!recipeTitle) {
+        console.error('Recipe title cannot be empty.');
+        return;
+    }
+
+    try {
+        const q = query(collection(db, 'recipes'), where("title", "==", recipeTitle));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            console.error('A recipe with this title already exists.');
+            alert("A recipe with this title already exists!");
+            return;
+        }
+
+        const docRef = await addDoc(collection(db, 'recipes'), { // <--- await addDoc
+            title: recipeTitle,
+            created_at: serverTimestamp()
+        });
+
+        // Get the document (no need for .then() here)
+        const doc = await getDoc(docRef); // <--- await getDoc
+        console.log("Document written with ID: ", docRef.id);
+        console.log("created_at:", doc.data().created_at);
+
+        // Success message
+       alert("Recipe added successfully!");
 
 
-// Add recipe function
-const addRecipe = (recipeTitle) => {
-  addDoc(collection(db, 'recipes'), {
-    title: recipeTitle,
-    created_at: serverTimestamp() // Use server timestamp for better accuracy
-  })
-  .then(() => {
-    console.log('Recipe added');
-    form.reset(); // Clear the form
-  })
-  .catch(error => {
-    console.error('Error adding recipe:', error);
-    // Handle error (e.g., display an error message to the user)
-  });
+   } catch (error) {
+    console.error('Error adding recipe:', error.message, error); // Log for debugging
+
+    const errorContainer = document.getElementById('recipe-error');
+    if (errorContainer) {
+        errorContainer.textContent = "Error adding recipe: " + error.message;
+    } else {
+        alert("Error adding recipe: " + error.message); // Fallback to alert if no error container
+    }
+} finally {
+    form.reset();
+}
 };
-
-
-
-// Form submit event listener
-form.addEventListener('submit', (e) => {
-    e.preventDefault(); // Prevent default form submission
-
-  const recipeTitle = form.recipe.value;
-  if (recipeTitle) {  //check if the input is empty or not.
-     addRecipe(recipeTitle);
-  }
-});
-
-
-
+                  
+    // Form submit event listener
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const recipeTitle = form.recipe.value;
+        addRecipe(recipeTitle); //Call function after verifying the input and after form submission.
+    });
+    });
 
