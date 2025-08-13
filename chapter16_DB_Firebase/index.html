@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=chrome">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css">
@@ -12,64 +12,19 @@
 <body>
     <div class="container my-5 mx-auto">
         <h2 class="text-muted text-center my-4">Ninja Recipes</h2>
-        <ul>
-        </ul>
-        <form>
-            <label for="Recipes"> Add a new recipe:</label>
+
+        <form id="form">
+            <label for="recipe">Add a new recipe:</label>
             <div class="input-group">
-                <input type="text" name="recipe" class="form-control p-4" id="recipe" required placeholder="Enter recipe name" title="Recipe name">
-                <div class="input-group-append">
-                    <input type="submit" value="add" class="btn btn-outline-secondary">
-                </div>
-            </div>  
+                <input type="text" name="recipe" class="form-control p-3" id="recipe" required placeholder="Enter recipe name" title="Recipe name">
+            </div>
+            <button type="submit" class="btn btn-primary">Add Recipe</button>
         </form>
+
+        <ul id="output"></ul>
+
     </div>
-            
-            
-
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-  import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-  import { addDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyB5tw8p2rAPxVtZy-v-mbozm7ZuX8hnypo",
-    authDomain: "ninja-recipes-5c5b1.firebaseapp.com",
-    projectId: "ninja-recipes-5c5b1",
-    storageBucket: "ninja-recipes-5c5b1.firebasestorage.app",
-    messagingSenderId: "473985350875",
-    appId: "1:473985350875:web:6e6d611fa10d5903f560fe",
-    measurementId: "G-1JW7CGS7Y9"
-  };   
-  // Initialize Firebase
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const analytics = getAnalytics(app);  
-
-  
-// Fetching data from Firestore
-  // This example fetches all documents from the 'recipes' collection   
-
-const recipesCol = collection(db, 'recipes');
-getDocs(recipesCol).then((snapshot) => {
-  snapshot.forEach(doc => {
-    console.log(doc.id, doc.data());
-  });
-}).catch((error) => {
-  console.error('Error fetching recipes:', error);
-});
-
- 
-</script>
-    <script src="sandbox.js"></script>
-</body>
+     <script src="sandbox.js"> type="module" </script>
+ </body>
+   
 </html>
