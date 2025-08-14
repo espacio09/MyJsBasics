@@ -3,7 +3,7 @@
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
   import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
   import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-  import { addDoc, getDoc, serverTimestamp, onSnapshot, query, orderBy  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+  import { addDoc, getDoc, serverTimestamp, onSnapshot, query, where, orderBy  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
   // TODO: Add SDKs for Firebase products that you want to use
@@ -34,6 +34,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('form');
     const outputList = document.getElementById('output');
+    
 
     // Display recipes function (moved outside onSnapshot)
     const displayRecipes = () => {
@@ -66,15 +67,53 @@
 
 
     // Add recipe function
-   const addRecipe = async (recipeTitle) => {
-    if (!recipeTitle) {
-        console.error('Recipe title cannot be empty.');
+ 
+    async function addRecipe(recipeTitle) {
+    if (!recipeTitle || recipeTitle === null) {
+        console.error('Recipe title cannot be empty or null.');
         return;
-    }
+    } else if (recipeTitle.trim() === "") {
+        console.error('Recipe title cannot be an empty string.');
+        alert("Recipe title cannot be an empty string!");
+        return;
 
-    try {
-        const q = query(collection(db, 'recipes'), where("title", "==", recipeTitle));
-        const querySnapshot = await getDocs(q);
+    } else if (typeof recipeTitle !== 'string') {
+        console.error('Recipe title must be a string.');
+        alert("Recipe title must be a string!");
+        return;
+
+        }  
+        // Convert recipeTitle to lowercase and handle null
+        // This ensures that the title is always a string and prevents errors
+
+        const recipeTitleLower = String(recipeTitle).toLowerCase(); // Handle null and convert to lowercase
+        
+        if (recipeTitleLower.length < 3) {
+            console.error('Recipe title must be at least 3 characters long.');
+            alert("Recipe title must be at least 3 characters long!");
+            return;
+        }     
+         try {
+    
+        const recipesRef = collection(db, 'recipes');
+        const unsubscribe = onSnapshot(query(recipesRef, where("titleLower", "==", recipeTitleLower)),
+        (querySnapshot) => {
+     // This callback will fire initially with the current data and then every time the data changes
+        querySnapshot.forEach((doc) => {
+         console.log("Current data: ", doc.data());
+
+     // Remember to unsubscribe when you no longer need real-time updates:
+         unsubscribe(); 
+    });
+     },
+      (error) => {
+    console.error("Error fetching documents: ", error);
+    
+  }
+);
+
+        // Check if a recipe with the same title already exists
+
 
         if (!querySnapshot.empty) {
             console.error('A recipe with this title already exists.');
@@ -82,7 +121,38 @@
             return;
         }
 
-        const docRef = await addDoc(collection(db, 'recipes'), { // <--- await addDoc
+       async function checkForExistingRecipe(recipeTitle) {
+      // Assuming 'recipes' is your collection name and 'title' is the field
+      const recipesRef = firebase.firestore().collection('recipes');
+
+  // Check for null or empty recipeTitle *before* querying Firestore
+  if (!recipeTitle || recipeTitle.trim() === "") {
+    console.error('Recipe title cannot be null or empty.');
+    alert("Recipe title cannot be null or empty.");
+    return; // Or throw an error to stop execution
+  }
+
+
+
+  return recipesRef.where('title', '==', recipeTitle).get()
+    .then((querySnapshot) => {
+      if (!querySnapshot.empty) {
+        console.error('A recipe with this title already exists.');
+        alert("A recipe with this title already exists!");
+        throw new Error("Recipe title already exists"); // Throw an error to be caught later
+      }
+
+       // If you reach here, the title is unique and you can proceed to save
+
+    })
+    .catch((error) => {
+      console.error("Error checking for existing recipe:", error);
+      // Handle the error appropriately, perhaps display a user-friendly message
+      alert("An error occurred while checking the recipe title.");
+    });
+}
+
+     const docRef = await addDoc(collection(db, 'recipes'), { // <--- await addDoc
             title: recipeTitle,
             created_at: serverTimestamp()
         });
