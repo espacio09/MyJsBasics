@@ -36,6 +36,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const recipeInput = form.recipe; // Get the recipe input field once
 
 
+    // Start the listener when your application initializes
+    listenForRecipes();
+
+    function listenForRecipes() {
+    const recipesRef = collection(db, 'recipes');
+    const q = query(recipesRef);
+
+    unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const newRecipes = [];
+        querySnapshot.forEach((doc) => {
+            newRecipes.push({ id: doc.id, ...doc.data() });
+        });
+        updateRecipes(newRecipes);
+    }, (error) => {
+        console.error("Error listening for recipes:", error);
+    });
+}
+
+
     // Function to display recipes (using async/await)
     async function displayRecipes() {
         try {
@@ -63,15 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
-    // Function to check for an existing recipe (using async/await)
-    async function checkForExistingRecipe(recipeTitle) {
-        const recipesRef = collection(db, 'recipes');
-        const q = query(recipesRef, where("titleLower", "==", recipeTitle.toLowerCase()));
-        const querySnapshot = await getDocs(q);
-
-        return !querySnapshot.empty; // Return true if recipe exists, false otherwise. More concise.
-    }
 
 
     // Function to add a new recipe (using async/await)
@@ -121,6 +131,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert("Oops! There was a problem adding the recipe:\n" + error.message);
             }
         }
+        
+    // Function to check for an existing recipe (using async/await)
+    function listenForRecipes(callback) {
+    const recipesRef = collection(db, 'recipes');
+    const q = query(recipesRef); // You can add your 'where' clause here if needed
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const recipes = [];
+        querySnapshot.forEach((doc) => {
+            recipes.push({ id: doc.id, ...doc.data() });
+        });
+        callback(recipes); // Update your UI with the fresh recipes data
+    }, (error) => {
+        console.error("Error listening for recipes:", error);
+        // Handle the error appropriately, perhaps showing an error message to the user.
+    });
+
+    return unsubscribe; // Return the unsubscribe function for cleanup
+}
+
+    async function checkForExistingRecipe(recipeTitle) {
+        const recipesRef = collection(db, 'recipes');
+        const q = query(recipesRef, where("titleLower", "==", recipeTitle.toLowerCase()));
+        const querySnapshot = await getDocs(q);
+
+        return !querySnapshot.empty; // Return true if recipe exists, false otherwise. More concise.
+    }
+
     }
 
     // Initial display of recipes
