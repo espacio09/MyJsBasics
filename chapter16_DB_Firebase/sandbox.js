@@ -28,31 +28,13 @@
   const db = getFirestore(app);
   const analytics = getAnalytics(app);  
 
+
 // DOMContentLoaded event listener
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('form');
     const outputList = document.getElementById('output');
     const errorContainer = document.getElementById('recipe-error'); // Get error container once
     const recipeInput = form.recipe; // Get the recipe input field once
-
-
-    // Start the listener when your application initializes
-    listenForRecipes();
-
-    function listenForRecipes() {
-    const recipesRef = collection(db, 'recipes');
-    const q = query(recipesRef);
-
-    unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const newRecipes = [];
-        querySnapshot.forEach((doc) => {
-            newRecipes.push({ id: doc.id, ...doc.data() });
-        });
-        updateRecipes(newRecipes);
-    }, (error) => {
-        console.error("Error listening for recipes:", error);
-    });
-}
 
 
     // Function to display recipes (using async/await)
@@ -68,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-
             querySnapshot.forEach((doc) => {
                 const recipe = doc.data();
                 const time = recipe.created_at ? recipe.created_at.toDate().toLocaleString() : 'Date not available';
@@ -81,8 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
             outputList.innerHTML = "<li>Error loading recipes. Please try again later.</li>"; // Display user-friendly error message
         }
     }
-
-
 
     // Function to add a new recipe (using async/await)
     async function addRecipe(recipeTitle) {
@@ -104,33 +83,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error("A recipe with this title already exists.");
             }
 
-
             const newRecipe = {
                 title: recipeTitle,
                 titleLower: recipeTitle.toLowerCase(), // Store lowercase for efficient querying
                 created_at: serverTimestamp()
             };
 
-            await addDoc(collection(db, 'recipes'), newRecipe);
-            console.log("Recipe added:", recipeTitle);
+        } catch (error) {  // Correct placement of the catch block
+        console.error("Error adding recipe:", error); // Log for debugging
 
-            // Clear error message after successful addition
-            if (errorContainer) {
-                errorContainer.textContent = ""; 
-            }
-
-            recipeInput.value = ''; // Clear the input field
-            displayRecipes(); // Update recipe list directly
-
-        } catch (error) {
-            console.error("Error adding recipe:", error); // Log for debugging
-            if (errorContainer) {
-                errorContainer.textContent = error.message; // Display error in error container
-            } else {
-                // Use a more user-friendly alert as a fallback.
-                alert("Oops! There was a problem adding the recipe:\n" + error.message);
-            }
+        if (error.message && error.message.includes("Missing or insufficient permissions")) {
+            // ... more specific error message ...
         }
+        if (errorContainer) {
+            errorContainer.textContent = error.message; 
+        } else {
+            alert("Oops! There was a problem adding the recipe:\n" + error.message);
+        }
+
+            await addDoc(collection(db, 'recipes'), newRecipe);
+            console.log("Recipe successfully added:", recipeTitle);
+   
+}
+    }
+
+    
+        
+ // Initial display of recipes
+    displayRecipes();
+        
+         
+       
         
     // Function to check for an existing recipe (using async/await)
     function listenForRecipes(callback) {
@@ -151,18 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return unsubscribe; // Return the unsubscribe function for cleanup
 }
 
-    async function checkForExistingRecipe(recipeTitle) {
-        const recipesRef = collection(db, 'recipes');
-        const q = query(recipesRef, where("titleLower", "==", recipeTitle.toLowerCase()));
-        const querySnapshot = await getDocs(q);
 
-        return !querySnapshot.empty; // Return true if recipe exists, false otherwise. More concise.
-    }
-
-    }
-
-    // Initial display of recipes
-    displayRecipes();
 
     // Form submit event listener
     form.addEventListener('submit', async (e) => {
@@ -170,4 +142,4 @@ document.addEventListener('DOMContentLoaded', () => {
         const recipeTitle = recipeInput.value;
         await addRecipe(recipeTitle); // No need to call displayRecipes again; it's done within addRecipe now.
     });
-});
+})
