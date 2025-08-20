@@ -37,59 +37,80 @@ document.addEventListener('DOMContentLoaded', () => {
     const recipeInput = form.recipe; // Get the recipe input field once
 
 
-    // Function to display recipes (using async/await)
+   // Function to display recipes (using async/await)
     async function displayRecipes() {
-        try {
-            outputList.innerHTML = ''; // Clear the list efficiently
+    try {
+        const q = query(collection(db, 'recipes'), orderBy("created_at", "desc"));
+        const querySnapshot = await getDocs(q);
 
-            const q = query(collection(db, 'recipes'), orderBy("created_at", "desc"));
-            const querySnapshot = await getDocs(q); // Use getDocs for one-time fetch
-
-            if (querySnapshot.empty) {
-                outputList.innerHTML = "<li>No recipes yet. Add one!</li>";
-                return;
-            }
-
-            querySnapshot.forEach((doc) => {
-                const recipe = doc.data();
-                const time = recipe.created_at ? recipe.created_at.toDate().toLocaleString() : 'Date not available';
-                const li = document.createElement('li');
-                li.innerHTML = `<strong>${recipe.title}</strong><br><small>${time}</small>`;
-                outputList.appendChild(li);
-            });
-        } catch (error) {
-            console.error("Error fetching recipes:", error);
-            outputList.innerHTML = "<li>Error loading recipes. Please try again later.</li>"; // Display user-friendly error message
+        if (querySnapshot.empty) {
+            outputList.innerHTML = "<li>No recipes yet. Add one!</li>";
+            return;
         }
+
+        outputList.innerHTML = ''; // Clear the list *after* checking for empty results
+
+        querySnapshot.forEach((doc) => {
+            const recipe = doc.data();
+            const recipeId = doc.id; // Get the document ID
+            const time = recipe.created_at ? recipe.created_at.toDate().toLocaleString() : 'Date not available';
+
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${recipe.title}</strong><br><small>${time}</small>`;
+            li.dataset.recipeId = recipeId; // Store the ID on the list item
+
+            // Optional: Add click handler
+            li.addEventListener('click', () => {
+                // Handle recipe click (e.g., view details)
+                viewRecipeDetails(recipeId); 
+            });
+
+            outputList.appendChild(li);
+        });
+    } catch (error) {
+        console.error("Error fetching recipes:", error);
+        outputList.innerHTML = "<li>Error loading recipes. Please try again later.</li>";
     }
+}
+// Initial display of recipes
+    displayRecipes();
+
 
     // Function to add a new recipe (using async/await)
     async function addRecipe(recipeTitle) {
-        try {
-            // Input validation:
-            if (typeof recipeTitle !== 'string') {
-                throw new Error("Recipe title must be a string.");
-            }
+    try {
+        // Input validation:
+        if (typeof recipeTitle !== 'string') {
+            throw new Error("Recipe title must be a string.");
+        }
 
-            if (!recipeTitle || recipeTitle.trim() === "") {
-                throw new Error("Recipe title cannot be empty.");
-            }
-            if (recipeTitle.length < 3) {
-                throw new Error("Recipe title must be at least 3 characters long.");
-            }
+        if (!recipeTitle || recipeTitle.trim() === "") {
+            throw new Error("Recipe title cannot be empty.");
+        }
+        if (recipeTitle.length < 3) {
+            throw new Error("Recipe title must be at least 3 characters long.");
+        }
 
-            const recipeExists = await checkForExistingRecipe(recipeTitle);
-            if (recipeExists) {
-                throw new Error("A recipe with this title already exists.");
-            }
+        const recipeExists = await checkForExistingRecipe(recipeTitle);
+        if (recipeExists) {
+            throw new Error("A recipe with this title already exists.");
+        }
 
-            const newRecipe = {
-                title: recipeTitle,
-                titleLower: recipeTitle.toLowerCase(), // Store lowercase for efficient querying
-                created_at: serverTimestamp()
-            };
+        const newRecipe = {
+            title: recipeTitle,
+            titleLower: recipeTitle.toLowerCase(), // Store lowercase for efficient querying
+            created_at: serverTimestamp()
+        };
 
-        } catch (error) {  // Correct placement of the catch block
+        // addDoc *outside* the catch block
+        await addDoc(collection(db, 'recipes'), newRecipe);
+        console.log("Recipe successfully added:", recipeTitle);
+
+// Initial display of recipes
+    displayRecipes();
+
+
+    } catch (error) {  // Correct placement of the catch block
         console.error("Error adding recipe:", error); // Log for debugging
 
         if (error.message && error.message.includes("Missing or insufficient permissions")) {
@@ -100,46 +121,81 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             alert("Oops! There was a problem adding the recipe:\n" + error.message);
         }
-
-            await addDoc(collection(db, 'recipes'), newRecipe);
-            console.log("Recipe successfully added:", recipeTitle);
-   
-}
     }
 
-    
         
  // Initial display of recipes
     displayRecipes();
         
          
-       
-        
-    // Function to check for an existing recipe (using async/await)
-    function listenForRecipes(callback) {
+    
+    // Check for an existing recipe at the time of submission
+    async function checkForExistingRecipe(recipeTitle) {
     const recipesRef = collection(db, 'recipes');
-    const q = query(recipesRef); // You can add your 'where' clause here if needed
+    const q = query(recipesRef, where("titleLower", "==", recipeTitle.toLowerCase()));
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty; // Returns true if a recipe with the same title (case-insensitive) exists
+}
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+
+    form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const recipeTitle = recipeInput.value;
+
+     showLoadingIndicator(); // Your function to show a loading indicator
+
+    try {
+        if (await checkForExistingRecipe(recipeTitle)) {
+            throw new Error("A recipe with this title already exists.");
+        }
+
+        await addRecipe(recipeTitle);
+
+ 
+    } catch (error) {
+        console.error("Error during form submission:", error);
+
+    
+        // Display error message to the user
+       const errorContainer= document.getElementById('errorContainer');
+        if (errorContainer) {
+            errorContainer.textContent = error.message;
+        } else {
+            alert("Error: " + error.message);
+        }
+    } finally {
+        hideLoadingIndicator(); // Your function to hide the loading indicator  
+
+// Always update the recipe list after submission, regardless of success or failure
+ // Initial display of recipes
+    displayRecipes();
+    }
+    });
+
+
+// Call listenForRecipes once to set up the initial display and keep it updated
+function listenForRecipes(callback) {
+    const q = query(collection(db, 'recipes'), orderBy("created_at", "desc"));
+    return onSnapshot(q, (querySnapshot) => {
         const recipes = [];
         querySnapshot.forEach((doc) => {
             recipes.push({ id: doc.id, ...doc.data() });
         });
-        callback(recipes); // Update your UI with the fresh recipes data
-    }, (error) => {
-        console.error("Error listening for recipes:", error);
-        // Handle the error appropriately, perhaps showing an error message to the user.
+        callback(recipes);
     });
-
-    return unsubscribe; // Return the unsubscribe function for cleanup
 }
 
 
 
-    // Form submit event listener
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const recipeTitle = recipeInput.value;
-        await addRecipe(recipeTitle); // No need to call displayRecipes again; it's done within addRecipe now.
-    });
-})
+const unsubscribe = listenForRecipes((recipes) => {
+    // Update your UI with the recipes data
+    displayRecipes(recipes); // Assuming you have a displayRecipes function
+});
+    };
+
+
+// ... later, if you need to stop listening (e.g., component unmounts)
+// unsubscribe()
+
+});
+// DOM listener is now closed!!!!
