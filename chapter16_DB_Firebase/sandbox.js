@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const recipeInput = form.recipe; // Get the recipe input field once
 
 
+ 
    // Function to display recipes (using async/await)
     async function displayRecipes() {
     try {
@@ -75,6 +76,16 @@ document.addEventListener('DOMContentLoaded', () => {
 // Initial display of recipes
     displayRecipes();
 
+       //You need to add an event listener to your button and call event.preventDefault()
+    const addRecipeButton = document.getElementById('addRecipeButton');
+
+    if (addRecipeButton) { //Good practice to check if element is found
+    addRecipeButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    console.log("Default form submission prevented!");
+    // ... (your code to add the recipe) ...
+  });
+
 
     // Function to add a new recipe (using async/await)
     async function addRecipe(recipeTitle) {
@@ -83,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof recipeTitle !== 'string') {
             throw new Error("Recipe title must be a string.");
         }
-
+/* 
         if (!recipeTitle || recipeTitle.trim() === "") {
             throw new Error("Recipe title cannot be empty.");
         }
@@ -94,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const recipeExists = await checkForExistingRecipe(recipeTitle);
         if (recipeExists) {
             throw new Error("A recipe with this title already exists.");
-        }
+        } */
 
         const newRecipe = {
             title: recipeTitle,
@@ -102,9 +113,34 @@ document.addEventListener('DOMContentLoaded', () => {
             created_at: serverTimestamp()
         };
 
+        const docRef = await addDoc(collection(db, 'recipes'), newRecipe);
+        console.log("Recipe added with ID:", docRef.id);
+        recipeTitle.value = ''; // Clear the input field *after* success
+        // ... any other actions on success ...
+
+        return docRef.id;
+
+    } catch((error) => {
+                console.error("Error adding recipe (inner catch):", error);
+            });
+
+}
+        
+  /*   } catch (error) {
+        console.error("Error (outer catch):", error.message);
+    }
         // addDoc *outside* the catch block
-        await addDoc(collection(db, 'recipes'), newRecipe);
-        console.log("Recipe successfully added:", recipeTitle);
+             await addDoc(collection(db, 'recipes'), newRecipe)
+            .then(() => {
+                console.log("Recipe successfully added:", recipeTitle);
+            })
+            .catch((error) => {
+                console.error("Error adding recipe: ", error);  // <-- Crucial for debugging
+            }); */
+
+
+} else {
+      console.error("Add Recipe button not found!");
 
 // Initial display of recipes
     displayRecipes();
