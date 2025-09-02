@@ -2,8 +2,9 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
   import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-  import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-  import { addDoc, getDoc, serverTimestamp, onSnapshot, query, where, orderBy  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+  import { collection} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+  import {query, orderBy, onSnapshot, addDoc, getDocs, serverTimestamp} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
 
 
   // TODO: Add SDKs for Firebase products that you want to use
@@ -26,7 +27,8 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-  const analytics = getAnalytics(app);  
+    const analytics = getAnalytics(app);
+
 
 
 
@@ -36,12 +38,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorContainer = document.getElementById('errorContainer');
     const recipeInput = form.recipe;
     const addRecipeButton = document.getElementById('addRecipeButton');
-    const loadingIndicator = document.getElementById('loadingIndicator');
+    const loadingIndicator = document.getElementById('loadingIndicator'); //  Get the element
 
 
 
+    
+ // === Real-time Listener ===
+    listenForRecipes(displayRecipes);
 
- // === Event Listeners ===
+
+    
+// === Add Recipe Button Click (optional) ===
     if (addRecipeButton) {
         addRecipeButton.addEventListener('click', (event) => {
             event.preventDefault();
@@ -51,35 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Add Recipe button not found!");
     }
 
-
-
-form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const recipeTitle = recipeInput.value.trim();
-        errorContainer.textContent = "";
-
-        if (!recipeTitle) {
-            errorContainer.textContent = "Recipe title cannot be empty.";
-            return;
-        }
-
-        try {
-            if (await checkForExistingRecipe(recipeTitle)) {
-                throw new Error("A recipe with this title already exists.");
-            }
-
-            showLoadingIndicator();
-            await addRecipe(recipeTitle);
-        } catch (error) {
-            console.error("Error during form submission:", error);
-            errorContainer.textContent = error.message;
-        } finally {
-            hideLoadingIndicator();
-        }
-    });
-
     
-form.addEventListener('submit', async (e) => {
+// === Form Submission ===
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const recipeTitle = recipeInput.value.trim();
         errorContainer.textContent = "";
@@ -103,39 +84,51 @@ form.addEventListener('submit', async (e) => {
             hideLoadingIndicator();
         }
     });
+});
 
 
-// Display recipes in the UI
-async function displayRecipes(recipes) {
+// === Display Recipes ===
+
+function displayRecipes(recipes) {
     const outputList = document.getElementById('output');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+
+    if (loadingIndicator) loadingIndicator.style.display = 'block'; // Show while updating
+
     if (!recipes || recipes.length === 0) {
         outputList.innerHTML = "<li>No recipes yet. Add one!</li>";
-        return;
+    } else {
+        outputList.innerHTML = '';
+        recipes.forEach((recipe) => {
+            const time = recipe.created_at ? recipe.created_at.toDate().toLocaleString() : 'Date not available';
+            const li = document.createElement('li');
+             li.innerHTML = `<strong>${recipe.title}</strong><br><small>${time}</small>`;
+            li.dataset.recipeId = recipe.id;
+
+            li.addEventListener('click', () => {
+                viewRecipeDetails(recipe.id);
+            });
+
+            outputList.appendChild(li);
+        });
     }
 
-    outputList.innerHTML = '';
-    recipes.forEach((recipe) => {
-        const time = recipe.created_at ? recipe.created_at.toDate().toLocaleString() : 'Date not available';
-        const li = document.createElement('li');
-        li.innerHTML = `<strong>${recipe.title}</strong><br><small>${time}</small>`;
-        li.dataset.recipeId = recipe.id;
-
-        li.addEventListener('click', () => {
-            viewRecipeDetails(recipe.id);
-        });
-
-        outputList.appendChild(li);
-    });
+    if (loadingIndicator) loadingIndicator.style.display = 'none'; // Hide after update
 }
 
 
 
-// Add a new recipe to Firestore
+// === Add Recipe ===
+
 async function addRecipe(recipeTitle) {
     const errorContainer = document.getElementById('errorContainer');
     const recipeInput = document.getElementById('form').recipe;
+    const loadingIndicator = document.getElementById('loadingIndicator'); //  Get the element
 
     try {
+        //  Show loading before starting
+        if (loadingIndicator) loadingIndicator.style.display = 'block';
+
         if (typeof recipeTitle !== 'string' || recipeTitle.trim() === "") {
             throw new Error("Recipe title cannot be empty.");
         }
@@ -150,10 +143,10 @@ async function addRecipe(recipeTitle) {
             created_at: serverTimestamp()
         };
 
-        const docRef = await addDoc(collection(db, 'recipes'), newRecipe);
+        document.getElementById("output").textContent = `Recipe added with ID: ${docRef.id}`;
         console.log("Recipe added with ID:", docRef.id);
         recipeInput.value = '';
-        return docRef.id;
+        return docRef.id; // Return the document ID
 
     } catch (error) {
         if (errorContainer) {
@@ -162,21 +155,48 @@ async function addRecipe(recipeTitle) {
             alert("Oops! There was a problem adding the recipe:\n" + error.message);
         }
         console.error("Error adding recipe:", error);
+         throw error; 
+        
+        } finally {
+        //  Hide loading after operation completes
+        if (loadingIndicator) loadingIndicator.style.display = 'none';
     }
 }
 
 
 
-// Check if a recipe already exists
+
+// === View Recipe Details ===
+async function viewRecipeDetails(recipeId) {
+    try {
+        const docRef = doc(db, 'recipes', recipeId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const recipe = docSnap.data();
+            const time = recipe.created_at?.toDate().toLocaleString() || 'No date';
+
+            // Example: Show in alert (replace with modal or custom UI)
+            alert(`Title: ${recipe.title}\nCreated: ${time}`);
+        } else {
+            alert("Recipe not found.");
+        }
+    } catch (error) {
+        console.error("Error fetching recipe details:", error);
+        alert("Failed to load recipe details.");
+    }
+}
+
+//=== Check for Existing Recipe ===
 async function checkForExistingRecipe(title) {
-    const q = query(collection(db, 'recipes'));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.some(doc => doc.data().titleLower === title.toLowerCase());
+    const q = query(collection(db, 'recipes'), where("titleLower", "==", title.toLowerCase())); // Use where() for efficiency
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty; // More efficient check
 }
 
 
 
-// Real-time listener for recipe updates
+// === Real-time Listener ===
 function listenForRecipes(callback) {
     const q = query(collection(db, 'recipes'), orderBy("created_at", "desc"));
     return onSnapshot(q, (querySnapshot) => {
@@ -185,23 +205,17 @@ function listenForRecipes(callback) {
     });
 }
 
-// Placeholder for loading indicator
+
+// === Loading Indicator ===
 function showLoadingIndicator() {
-    // Implement your spinner logic here
-    console.log("Loading...");
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    if (loadingIndicator) loadingIndicator.style.display = 'block';
 }
 
 function hideLoadingIndicator() {
-    // Hide spinner logic here
-    console.log("Done loading.");
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    if (loadingIndicator) loadingIndicator.style.display = 'none';
 }
 
 
-
-
-// Placeholder for viewing recipe details
-function viewRecipeDetails(recipeId) {
-    // Implement your detail view logic here
-    console.log("Viewing recipe:", recipeId);
-}
 

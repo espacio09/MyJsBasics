@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Firebase SDKs -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -16,12 +17,16 @@
         <form id="form">
             <label for="recipe">Add a new recipe:</label>
             <div class="input-group">
-                <input type="text" name="recipe" class="form-control p-3" id="recipe" required placeholder="Enter recipe name" title="Recipe name">
+                <input type="text" name="recipe" class="form-control p-3" id="recipe" placeholder="Enter recipe title" title="Recipe name">
             </div>
             <button type="submit" id="addRecipeButton" class="btn btn-primary">Add Recipe</button>
         </form>
-
+        <div id="errorContainer" class="mt-3 text-danger" style="color: red"></div>
         <ul id="output"></ul>
+       
+        <div id="loadingIndicator" class="text-end text-muted mt-3" style="display: none;">
+        Loading...
+        </div>
 
     </div>
      <script type="module" src="sandbox.js"></script>
