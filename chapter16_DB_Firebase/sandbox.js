@@ -3,7 +3,7 @@
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
   import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
   import { collection} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-  import {query, orderBy, onSnapshot, addDoc, getDocs, serverTimestamp} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+  import {query, orderBy, doc, where, onSnapshot, addDoc, getDocs, serverTimestamp} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
 
@@ -27,7 +27,7 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-    const analytics = getAnalytics(app);
+  const analytics = getAnalytics(app);
 
 
 
@@ -48,19 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     
-// === Add Recipe Button Click (optional) ===
-    if (addRecipeButton) {
-        addRecipeButton.addEventListener('click', (event) => {
-            event.preventDefault();
-            console.log("Default form submission prevented!");
-        });
-    } else {
-        console.error("Add Recipe button not found!");
-    }
-
     
 // === Form Submission ===
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async (e) => { 
+        console.log("Check1:");
         e.preventDefault();
         const recipeTitle = recipeInput.value.trim();
         errorContainer.textContent = "";
@@ -76,9 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             showLoadingIndicator();
+            console.log("Submitting recipe:", recipeTitle);
             await addRecipe(recipeTitle);
         } catch (error) {
-            console.error("Error during form submission:", error);
+            console.error("Form Submission Error:", error); // Catch errors in the handler
             errorContainer.textContent = error.message;
         } finally {
             hideLoadingIndicator();
@@ -120,7 +112,8 @@ function displayRecipes(recipes) {
 
 // === Add Recipe ===
 
-async function addRecipe(recipeTitle) {
+async function addRecipe(recipeTitle, ingeredients = []) {
+    console.log("Starting addRecipe"); // Check if function is reached
     const errorContainer = document.getElementById('errorContainer');
     const recipeInput = document.getElementById('form').recipe;
     const loadingIndicator = document.getElementById('loadingIndicator'); //  Get the element
@@ -138,17 +131,25 @@ async function addRecipe(recipeTitle) {
         }
 
         const newRecipe = {
-            title: recipeTitle,
-            titleLower: recipeTitle.toLowerCase(),
-            created_at: serverTimestamp()
+            title: recipeTitle.toLowerCase(),
+            created_at: serverTimestamp(),
+            ingeredients: ingeredients,        
         };
 
-        document.getElementById("output").textContent = `Recipe added with ID: ${docRef.id}`;
+         console.log("newRecipe:", newRecipe); // Inspect the data being sent
+        const docRef = await addDoc(collection(db, 'recipes'), newRecipe);
+         console.log("✅ Test recipe added with ID:", docRef.id);
+         document.getElementById("output").textContent = `Recipe added with ID: ${docRef.id}`;
+
+
+        console.log("docRef:", docRef); // Check if docRef is valid
+
         console.log("Recipe added with ID:", docRef.id);
         recipeInput.value = '';
         return docRef.id; // Return the document ID
 
     } catch (error) {
+        console.error("addRecipe Error:", error); // Detailed error logging
         if (errorContainer) {
             errorContainer.textContent = error.message;
         } else {
@@ -198,8 +199,10 @@ async function checkForExistingRecipe(title) {
 
 // === Real-time Listener ===
 function listenForRecipes(callback) {
+    console.log("listenForRecipes called");
     const q = query(collection(db, 'recipes'), orderBy("created_at", "desc"));
     return onSnapshot(q, (querySnapshot) => {
+        console.log("Snapshot received:", querySnapshot);
         const recipes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         callback(recipes);
     });
