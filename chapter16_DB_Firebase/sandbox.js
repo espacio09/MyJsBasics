@@ -3,7 +3,7 @@
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
   import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
   import { collection} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-  import {query, orderBy, doc, where, onSnapshot, addDoc, getDocs, serverTimestamp} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+  import {runTransaction, query, orderBy, doc, where, onSnapshot, addDoc, getDocs, serverTimestamp} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
 
@@ -74,42 +74,50 @@ function listenForRecipes(callback) {
     (document.getElementById('form')).addEventListener('submit', async (e) => { 
         console.log("Check1:");
         e.preventDefault();
-        const recipeTitle = (document.getElementById('form')).recipe.value.trim();
-        (document.getElementById('errorContainer')).textContent = "";
+        const errorContainer = document.getElementById('errorContainer'); // Cache the element
+        errorContainer.textContent = "";
 
         if (!recipeTitle) {
-            (document.getElementById('errorContainer')).textContent = "Recipe title cannot be empty.";
-            return;
-        }
+        errorContainer.textContent = "Recipe title cannot be empty.";
+        return;
+    }
 
-        try {
-            await runTransaction(db, async (transaction) => {
-            const recipesRef = collection(db, 'recipes'); // Or your specific collection
-             const query = query(recipesRef, where("title", "==", recipeTitle)); // Query for existing titles
-             const querySnapshot = await getDocs(query);
+    try {
+        await runTransaction(db, async (transaction) => {
+            const recipesRef = collection(db, 'recipes');
+            const query = query(recipesRef, where("title", "==", recipeTitle));
+            const querySnapshot = await getDocs(query);
 
-             console.log("Transaction querySnapshot:", querySnapshot);
 
          if (!querySnapshot.empty) {
-        throw new Error("A recipe with this title already exists."); // Throw error to abort the transaction
-      }
-            });
+                // Throw a custom error object for better handling
+                throw new Error("A recipe with this title already exists.");
+            }
 
-            showLoadingIndicator();
-            console.log("Submitting recipe:", recipeTitle);
-            await addRecipe(recipeTitle);
-        } catch (error) {
-            console.error("Form Submission Error:", error); // Catch errors in the handler
-            (document.getElementById('errorContainer')).textContent = error.message;
+            // *** IMPORTANT:  You MUST perform a write operation within the transaction ***
+            // Otherwise, the transaction does nothing.  Add the new recipe here.
+            const newRecipeRef = doc(recipesRef); // Create a new document reference
+            transaction.set(newRecipeRef, { title: recipeTitle }); // Add other recipe data
+
+        }); // <-- Add this closing parenthesis for runTransaction
+
+    } catch (error) {
+        console.error("Transaction Error:", error);
+        errorContainer.textContent = error.message;
+        
+    
+    } finally {
+        //showLoadingIndicator();   // Moved here, so it shows during the transaction too.
+        try {
+            // Simulate some work if you want to keep the indicator visible longer.  
+            // This could be replaced with a check for pending operations.
+           setTimeout(() => {
+               hideLoadingIndicator(); 
+           }, 200);  
+        } catch (hideError) {
+            console.error("Error hiding loading indicator:", hideError);
         }
-    finally {
-        setTimeout(hideLoadingIndicator, 200); // Wait 200ms
-       try {
-        hideLoadingIndicator();
-       } catch (hideError) {
-        console.error("Error hiding loading indicator:", hideError);
-      }
-    };
+    }
 });
 
 
