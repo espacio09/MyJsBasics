@@ -35,7 +35,7 @@
 async function testWrite() {
   try {
     const docRef = await addDoc(collection(db, "recipes"), {
-      title: "Test Recipe",
+      title: "Test 2",
       created_at: serverTimestamp()
     });
     console.log("✅ Test recipe added with ID:", docRef.id);

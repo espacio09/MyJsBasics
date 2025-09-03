@@ -31,51 +31,85 @@
 
 
 
-
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('form');
-    const outputList = document.getElementById('output');
-    const errorContainer = document.getElementById('errorContainer');
-    const recipeInput = form.recipe;
-    const addRecipeButton = document.getElementById('addRecipeButton');
-    const loadingIndicator = document.getElementById('loadingIndicator'); //  Get the element
+
+    let unsubscribe; // Declare unsubscribe in a scope that persists
+
+// === Attach Listener ===
+function attachListener() {
+    unsubscribe = listenForRecipes(displayRecipes);
+    console.log("Listener attached");
+}
 
 
+    
+// === Real-time Listener ===
+function listenForRecipes(callback) {
+    console.log("listenForRecipes called");
+    const q = query(collection(db, 'recipes'), orderBy("created_at", "desc"));
 
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {  // Added unsubscribe
+        console.log("Snapshot received:", querySnapshot);
+
+        try {
+            const recipes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            callback(recipes);
+        } catch (callbackError) {
+            console.error("Error in callback:", callbackError);
+        }
+
+    }, (error) => {
+        console.error("Error listening for recipes:", error);
+    });
+
+    return unsubscribe;  // VERY IMPORTANT: Return the unsubscribe function
+}
     
  // === Real-time Listener ===
     listenForRecipes(displayRecipes);
 
 
     
-    
 // === Form Submission ===
-    form.addEventListener('submit', async (e) => { 
+    (document.getElementById('form')).addEventListener('submit', async (e) => { 
         console.log("Check1:");
         e.preventDefault();
-        const recipeTitle = recipeInput.value.trim();
-        errorContainer.textContent = "";
+        const recipeTitle = (document.getElementById('form')).recipe.value.trim();
+        (document.getElementById('errorContainer')).textContent = "";
 
         if (!recipeTitle) {
-            errorContainer.textContent = "Recipe title cannot be empty.";
+            (document.getElementById('errorContainer')).textContent = "Recipe title cannot be empty.";
             return;
         }
 
         try {
-            if (await checkForExistingRecipe(recipeTitle)) {
-                throw new Error("A recipe with this title already exists.");
-            }
+            await runTransaction(db, async (transaction) => {
+            const recipesRef = collection(db, 'recipes'); // Or your specific collection
+             const query = query(recipesRef, where("title", "==", recipeTitle)); // Query for existing titles
+             const querySnapshot = await getDocs(query);
+
+             console.log("Transaction querySnapshot:", querySnapshot);
+
+         if (!querySnapshot.empty) {
+        throw new Error("A recipe with this title already exists."); // Throw error to abort the transaction
+      }
+            });
 
             showLoadingIndicator();
             console.log("Submitting recipe:", recipeTitle);
             await addRecipe(recipeTitle);
         } catch (error) {
             console.error("Form Submission Error:", error); // Catch errors in the handler
-            errorContainer.textContent = error.message;
-        } finally {
-            hideLoadingIndicator();
+            (document.getElementById('errorContainer')).textContent = error.message;
         }
-    });
+    finally {
+        setTimeout(hideLoadingIndicator, 200); // Wait 200ms
+       try {
+        hideLoadingIndicator();
+       } catch (hideError) {
+        console.error("Error hiding loading indicator:", hideError);
+      }
+    };
 });
 
 
@@ -130,23 +164,29 @@ async function addRecipe(recipeTitle, ingeredients = []) {
             throw new Error("Recipe title must be at least 3 characters long.");
         }
 
-        const newRecipe = {
+         if (await checkForExistingRecipe(recipeTitle)) {  // Correct usage
+            throw new Error("A recipe with this title already exists.");
+
+         }
+
+          const newRecipe = {
             title: recipeTitle.toLowerCase(),
             created_at: serverTimestamp(),
             ingeredients: ingeredients,        
         };
 
-         console.log("newRecipe:", newRecipe); // Inspect the data being sent
+        console.log("newRecipe:", newRecipe); // Inspect the data being sent
+        loadingIndicator(); // Show loading indicator before the asynchronous operation
         const docRef = await addDoc(collection(db, 'recipes'), newRecipe);
-         console.log("✅ Test recipe added with ID:", docRef.id);
+      
          document.getElementById("output").textContent = `Recipe added with ID: ${docRef.id}`;
 
 
         console.log("docRef:", docRef); // Check if docRef is valid
 
-        console.log("Recipe added with ID:", docRef.id);
         recipeInput.value = '';
         return docRef.id; // Return the document ID
+        
 
     } catch (error) {
         console.error("addRecipe Error:", error); // Detailed error logging
@@ -156,13 +196,11 @@ async function addRecipe(recipeTitle, ingeredients = []) {
             alert("Oops! There was a problem adding the recipe:\n" + error.message);
         }
         console.error("Error adding recipe:", error);
-         throw error; 
-        
-        } finally {
+        throw error; 
+    } finally {
         //  Hide loading after operation completes
         if (loadingIndicator) loadingIndicator.style.display = 'none';
     }
-}
 
 
 
@@ -190,23 +228,24 @@ async function viewRecipeDetails(recipeId) {
 
 //=== Check for Existing Recipe ===
 async function checkForExistingRecipe(title) {
-    const q = query(collection(db, 'recipes'), where("titleLower", "==", title.toLowerCase())); // Use where() for efficiency
-    const querySnapshot = await getDocs(q);
-    return !querySnapshot.empty; // More efficient check
-}
+  const db = getFirestore();
+  try {
+    const exists = await runTransaction(db, async (transaction) => {
+      const recipesRef = collection(db, 'recipes');
+      const q = query(recipesRef, where("titleLower", "==", title.toLowerCase()));
+      const querySnapshot = await getDocs(q);  // Now inside the transaction
 
-
-
-// === Real-time Listener ===
-function listenForRecipes(callback) {
-    console.log("listenForRecipes called");
-    const q = query(collection(db, 'recipes'), orderBy("created_at", "desc"));
-    return onSnapshot(q, (querySnapshot) => {
-        console.log("Snapshot received:", querySnapshot);
-        const recipes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        callback(recipes);
+      return !querySnapshot.empty; // Return the result within the transaction
     });
+
+    return exists;  // Return the result of the transaction
+
+  } catch (error) {
+    console.error("Error checking for existing recipe:", error);
+    throw error; // Propagate error
+  }
 }
+
 
 
 // === Loading Indicator ===
@@ -218,7 +257,15 @@ function showLoadingIndicator() {
 function hideLoadingIndicator() {
     const loadingIndicator = document.getElementById('loadingIndicator');
     if (loadingIndicator) loadingIndicator.style.display = 'none';
+}}
+
+
+// === Detach Listener ===
+function detachListener() { // Call this when the listener is no longer needed
+    if (unsubscribe) { 
+        unsubscribe();
+        console.log("Listener detached");
+    }
 }
-
-
+});
 
