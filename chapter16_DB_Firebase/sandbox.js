@@ -33,22 +33,33 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    let unsubscribe; // Declare unsubscribe in a scope that persists
+        // Define recipeTitleInput after the DOM is loaded, or where the element is guaranteed to exist.
+        const recipeTitleInput = document.getElementById('recipeTitle');
 
-// === Attach Listener ===
-function attachListener() {
-    unsubscribe = listenForRecipes(displayRecipes);
-    console.log("Listener attached");
-}
+        let unsubscribe; // Declare unsubscribe in a scope that persists
+        console.log("Script loaded, DOMContentLoaded event fired");
+      
+
+        // Attach the listener when the script loads
+        attachListener();
+
+      
 
 
-    
+        // === Attach Listener ===
+        function attachListener() {
+            unsubscribe = listenForRecipes(displayRecipes);
+            console.log("Listener attached");
+        }
+
+
+      
 // === Real-time Listener ===
 function listenForRecipes(callback) {
     console.log("listenForRecipes called");
     const q = query(collection(db, 'recipes'), orderBy("created_at", "desc"));
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {  // Added unsubscribe
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
         console.log("Snapshot received:", querySnapshot);
 
         try {
@@ -62,218 +73,238 @@ function listenForRecipes(callback) {
         console.error("Error listening for recipes:", error);
     });
 
-    return unsubscribe;  // VERY IMPORTANT: Return the unsubscribe function
+    return unsubscribe; // VERY IMPORTANT: Return the unsubscribe function
 }
-    
- // === Real-time Listener ===
-    listenForRecipes(displayRecipes);
 
 
-    
-// === Form Submission ===
-    (document.getElementById('form')).addEventListener('submit', async (e) => { 
-        console.log("Check1:");
-        e.preventDefault();
-        const errorContainer = document.getElementById('errorContainer'); // Cache the element
-        errorContainer.textContent = "";
-
-        if (!recipeTitle) {
-        errorContainer.textContent = "Recipe title cannot be empty.";
-        return;
-    }
-
-    try {
-        await runTransaction(db, async (transaction) => {
-            const recipesRef = collection(db, 'recipes');
-            const query = query(recipesRef, where("title", "==", recipeTitle));
-            const querySnapshot = await getDocs(query);
+        // === Real-time Listener ===
+        listenForRecipes();
 
 
-         if (!querySnapshot.empty) {
-                // Throw a custom error object for better handling
-                throw new Error("A recipe with this title already exists.");
+
+        // === Form Submission ===
+        (document.getElementById('form')).addEventListener('submit', async (e) => {
+            
+         console.log("Check2:", recipeTitle);
+
+            e.preventDefault();
+
+
+            const errorContainer = document.getElementById('errorContainer'); // Cache the element
+            errorContainer.textContent = "";
+
+            if (!recipeTitle) {
+                errorContainer.textContent = "Recipe title cannot be empty.";
+                return;
             }
 
-            // *** IMPORTANT:  You MUST perform a write operation within the transaction ***
-            // Otherwise, the transaction does nothing.  Add the new recipe here.
-            const newRecipeRef = doc(recipesRef); // Create a new document reference
-            transaction.set(newRecipeRef, { title: recipeTitle }); // Add other recipe data
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const recipesRef = collection(db, 'recipes');
+                    const query = query(recipesRef, where("title", "==", recipeTitle));
+                    const querySnapshot = await getDocs(query);
 
-        }); // <-- Add this closing parenthesis for runTransaction
+        const recipeTitle = recipeTitleInput.value.trim(); // Moved inside DOMContentLoaded to ensure element exists
+        console.log("Initial recipeTitle value:", recipeTitle); 
 
-    } catch (error) {
-        console.error("Transaction Error:", error);
-        errorContainer.textContent = error.message;
-        
-    
-    } finally {
-        //showLoadingIndicator();   // Moved here, so it shows during the transaction too.
-        try {
-            // Simulate some work if you want to keep the indicator visible longer.  
-            // This could be replaced with a check for pending operations.
-           setTimeout(() => {
-               hideLoadingIndicator(); 
-           }, 200);  
-        } catch (hideError) {
-            console.error("Error hiding loading indicator:", hideError);
-        }
-    }
-});
+                    if (!querySnapshot.empty) {
+                        // Throw a custom error object for better handling
+                        throw new Error("A recipe with this title already exists.");
+                    }
+
+                    console.log("Transaction proceeding to add recipe:", recipeTitle);
 
 
-// === Display Recipes ===
+                    // If we reach here, it means no duplicate was found
+                    // Proceed to add the new recipe
+                    addRecipe(recipeTitle); // Call the addRecipe function
+                    errorContainer.textContent = ""; // Clear any previous errors
+                    recipeTitleInput.value = ""; // Clear the input field   
+                    showLoadingIndicator(); // Show loading indicator during the transaction
 
-function displayRecipes(recipes) {
-    const outputList = document.getElementById('output');
-    const loadingIndicator = document.getElementById('loadingIndicator');
 
-    if (loadingIndicator) loadingIndicator.style.display = 'block'; // Show while updating
 
-    if (!recipes || recipes.length === 0) {
-        outputList.innerHTML = "<li>No recipes yet. Add one!</li>";
-    } else {
-        outputList.innerHTML = '';
-        recipes.forEach((recipe) => {
-            const time = recipe.created_at ? recipe.created_at.toDate().toLocaleString() : 'Date not available';
-            const li = document.createElement('li');
-             li.innerHTML = `<strong>${recipe.title}</strong><br><small>${time}</small>`;
-            li.dataset.recipeId = recipe.id;
+                    // *** IMPORTANT:  You MUST perform a write operation within the transaction ***
+                    // Otherwise, the transaction does nothing.  Add the new recipe here.
+                    const newRecipeRef = doc(recipesRef); // Create a new document reference
+                    transaction.set(newRecipeRef, { title: recipeTitle }); // Add other recipe data
 
-            li.addEventListener('click', () => {
-                viewRecipeDetails(recipe.id);
-            });
+                }); // <-- Add this closing parenthesis for runTransaction
 
-            outputList.appendChild(li);
+            } catch (error) {
+                console.error("Transaction Error:", error);
+                errorContainer.textContent = error.message;
+
+
+            } finally {
+                //showLoadingIndicator();   // Moved here, so it shows during the transaction too.
+                try {
+                    // Simulate some work if you want to keep the indicator visible longer.  
+                    // This could be replaced with a check for pending operations.
+                    setTimeout(() => {
+                        hideLoadingIndicator();
+                    }, 200);
+                } catch (hideError) {
+                    console.error("Error hiding loading indicator:", hideError);
+                }
+            }
         });
-    }
-
-    if (loadingIndicator) loadingIndicator.style.display = 'none'; // Hide after update
-}
 
 
 
-// === Add Recipe ===
+        // === Display Recipes ===
+        function displayRecipes(recipes) {
+            const outputList = document.getElementById('output');
+            const loadingIndicator = document.getElementById('loadingIndicator');
 
-async function addRecipe(recipeTitle, ingeredients = []) {
-    console.log("Starting addRecipe"); // Check if function is reached
-    const errorContainer = document.getElementById('errorContainer');
-    const recipeInput = document.getElementById('form').recipe;
-    const loadingIndicator = document.getElementById('loadingIndicator'); //  Get the element
+    
+            if (!recipes || recipes.length === 0) {
+                outputList.innerHTML = "<li>No recipes yet. Add one!</li>";
+            } else {
+                outputList.innerHTML = '';
+                recipes.forEach((recipe) => {
+                    const time = recipe.created_at ? recipe.created_at.toDate().toLocaleString() : 'Date not available';
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${recipe.title}</strong><br><small>${time}</small>`;
+                    li.dataset.recipeId = recipe.id;
 
-    try {
-        //  Show loading before starting
-        if (loadingIndicator) loadingIndicator.style.display = 'block';
+                    li.addEventListener('click', () => {
+                        viewRecipeDetails(recipe.id);
+                    });
 
-        if (typeof recipeTitle !== 'string' || recipeTitle.trim() === "") {
-            throw new Error("Recipe title cannot be empty.");
+                    outputList.appendChild(li);
+                });
+            }
+
         }
 
-        if (recipeTitle.length < 3) {
-            throw new Error("Recipe title must be at least 3 characters long.");
+
+
+        // === Add Recipe ===
+        async function addRecipe(recipeTitle, ingeredients = []) {
+            console.log("Starting addRecipe"); // Check if function is reached
+            const errorContainer = document.getElementById('errorContainer');
+            const recipeInput = document.getElementById('form').recipe;
+            const loadingIndicator = document.getElementById('loadingIndicator'); //  Get the element
+
+            try {
+                //  Show loading before starting
+                if (loadingIndicator) loadingIndicator.style.display = 'block';
+
+                if (typeof recipeTitle !== 'string' || recipeTitle.trim() === "") {
+                    throw new Error("Recipe title cannot be empty.");
+                }
+
+                if (recipeTitle.length < 3) {
+                    throw new Error("Recipe title must be at least 3 characters long.");
+                }
+
+                if (await checkForExistingRecipe(recipeTitle)) { // Correct usage
+                    throw new Error("A recipe with this title already exists.");
+
+                }
+
+                const newRecipe = {
+                    title: recipeTitle.toLowerCase(),
+                    created_at: serverTimestamp(),
+                    
+                };
+
+                console.log("newRecipe:", newRecipe); // Inspect the data being sent
+                loadingIndicator(); // Show loading indicator before the asynchronous operation
+                const docRef = await addDoc(collection(db, 'recipes'), newRecipe);
+
+                document.getElementById("output").textContent = `Recipe added with ID: ${docRef.id}`;
+
+
+                console.log("docRef:", docRef); // Check if docRef is valid
+
+                recipeInput.value = '';
+                return docRef.id; // Return the document ID
+
+
+            } catch (error) {
+                console.error("addRecipe Error:", error); // Detailed error logging
+                if (errorContainer) {
+                    errorContainer.textContent = error.message;
+                } else {
+                    alert("Oops! There was a problem adding the recipe:\n" + error.message);
+                }
+                console.error("Error adding recipe:", error);
+                throw error;
+            } finally {
+                //  Hide loading after operation completes
+                if (loadingIndicator) loadingIndicator.style.display = 'none';
+            }
+
+
+
+            /*
+            // === View Recipe Details ===    seems to work ok but redundantto form submit
+            async function viewRecipeDetails(recipeId) {
+                try {
+                    const docRef = doc(db, 'recipes', recipeId);
+                    const docSnap = await getDoc(docRef);
+            
+                    if (docSnap.exists()) {
+                        const recipe = docSnap.data();
+                        const time = recipe.created_at?.toDate().toLocaleString() || 'No date';
+            
+                        // Example: Show in alert (replace with modal or custom UI)
+                        alert(`Title: ${recipe.title}\nCreated: ${time}`);
+                    } else {
+                        alert("Recipe not found.");
+                    }
+                } catch (error) {
+                    console.error("Error fetching recipe details:", error);
+                    alert("Failed to load recipe details.");
+                }
+            }
+            
+            */
+            
+            
+            //=== Check for Existing Recipe ===
+            async function checkForExistingRecipe(title) {
+                const db = getFirestore();
+                try {
+                    const exists = await runTransaction(db, async (transaction) => {
+                        const recipesRef = collection(db, 'recipes');
+                        const q = query(recipesRef, where("titleLower", "==", title.toLowerCase()));
+                        const querySnapshot = await getDocs(q); // Now inside the transaction
+
+                        return !querySnapshot.empty; // Return the result within the transaction
+                    });
+
+                    return exists; // Return the result of the transaction
+
+                } catch (error) {
+                    console.error("Error checking for existing recipe:", error);
+                    throw error; // Propagate error
+                }
+            }
+
+
+
+            // === Loading Indicator ===
+            function showLoadingIndicator() {
+                const loadingIndicator = document.getElementById('loadingIndicator');
+                if (loadingIndicator) loadingIndicator.style.display = 'block';
+            }
+
+            function hideLoadingIndicator() {
+                const loadingIndicator = document.getElementById('loadingIndicator');
+                if (loadingIndicator) loadingIndicator.style.display = 'none';
+            }
         }
 
-         if (await checkForExistingRecipe(recipeTitle)) {  // Correct usage
-            throw new Error("A recipe with this title already exists.");
 
-         }
-
-          const newRecipe = {
-            title: recipeTitle.toLowerCase(),
-            created_at: serverTimestamp(),
-            ingeredients: ingeredients,        
-        };
-
-        console.log("newRecipe:", newRecipe); // Inspect the data being sent
-        loadingIndicator(); // Show loading indicator before the asynchronous operation
-        const docRef = await addDoc(collection(db, 'recipes'), newRecipe);
-      
-         document.getElementById("output").textContent = `Recipe added with ID: ${docRef.id}`;
-
-
-        console.log("docRef:", docRef); // Check if docRef is valid
-
-        recipeInput.value = '';
-        return docRef.id; // Return the document ID
-        
-
-    } catch (error) {
-        console.error("addRecipe Error:", error); // Detailed error logging
-        if (errorContainer) {
-            errorContainer.textContent = error.message;
-        } else {
-            alert("Oops! There was a problem adding the recipe:\n" + error.message);
+        // === Detach Listener ===
+        function detachListener() {
+            if (unsubscribe) {
+                unsubscribe();
+                console.log("Listener detached");
+            }
         }
-        console.error("Error adding recipe:", error);
-        throw error; 
-    } finally {
-        //  Hide loading after operation completes
-        if (loadingIndicator) loadingIndicator.style.display = 'none';
-    }
-
-
-
-
-// === View Recipe Details ===
-async function viewRecipeDetails(recipeId) {
-    try {
-        const docRef = doc(db, 'recipes', recipeId);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            const recipe = docSnap.data();
-            const time = recipe.created_at?.toDate().toLocaleString() || 'No date';
-
-            // Example: Show in alert (replace with modal or custom UI)
-            alert(`Title: ${recipe.title}\nCreated: ${time}`);
-        } else {
-            alert("Recipe not found.");
-        }
-    } catch (error) {
-        console.error("Error fetching recipe details:", error);
-        alert("Failed to load recipe details.");
-    }
-}
-
-//=== Check for Existing Recipe ===
-async function checkForExistingRecipe(title) {
-  const db = getFirestore();
-  try {
-    const exists = await runTransaction(db, async (transaction) => {
-      const recipesRef = collection(db, 'recipes');
-      const q = query(recipesRef, where("titleLower", "==", title.toLowerCase()));
-      const querySnapshot = await getDocs(q);  // Now inside the transaction
-
-      return !querySnapshot.empty; // Return the result within the transaction
     });
-
-    return exists;  // Return the result of the transaction
-
-  } catch (error) {
-    console.error("Error checking for existing recipe:", error);
-    throw error; // Propagate error
-  }
-}
-
-
-
-// === Loading Indicator ===
-function showLoadingIndicator() {
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    if (loadingIndicator) loadingIndicator.style.display = 'block';
-}
-
-function hideLoadingIndicator() {
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    if (loadingIndicator) loadingIndicator.style.display = 'none';
-}}
-
-
-// === Detach Listener ===
-function detachListener() { // Call this when the listener is no longer needed
-    if (unsubscribe) { 
-        unsubscribe();
-        console.log("Listener detached");
-    }
-}
-});
 
